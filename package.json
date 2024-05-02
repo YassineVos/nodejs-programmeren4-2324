@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "node ./node_modules/mocha/bin/mocha --reporter spec --exit"
   },
   "dependencies": {

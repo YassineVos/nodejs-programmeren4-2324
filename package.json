@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "build": "npm install",
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "node ./node_modules/mocha/bin/mocha --reporter spec --exit",
-    "build": "No build script specified"
+    
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

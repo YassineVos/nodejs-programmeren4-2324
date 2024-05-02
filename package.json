@@ -6,7 +6,8 @@
     "scripts": {
         "start": "node index.js",
         "dev": "nodemon index.js",
-        "test": "echo No tests to run."
+        "test": "echo No tests to run.",
+        "build": "echo No build necessary"
     },
     "keywords": [
         "nodejs",

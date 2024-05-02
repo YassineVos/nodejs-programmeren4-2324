@@ -5,6 +5,7 @@ const app = express();
 
 // express.json zorgt dat we de body van een request kunnen lezen
 app.use(express.json());
+app.use("/api", userRoutes);
 
 const port = process.env.PORT || 3000;
 

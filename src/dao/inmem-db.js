@@ -70,20 +70,20 @@ const database = {
     }, this._delayTime);
   },
 
-  update(item, callback) {
-    // Simuleer een asynchrone operatie
-    setTimeout(() => {
-      // Zoek het item in de database
-      const index = this._data.findIndex((user) => user.id === item.id);
-      if (index === -1) {
-        callback({ message: `Error: id ${item.id} does not exist!` }, null);
-      } else {
-        // Vervang het item in de database
-        this._data[index] = item;
-        callback(null, item);
-      }
-    }, this._delayTime);
-  },
+  //   update(item, callback) {
+  //     // Simuleer een asynchrone operatie
+  //     setTimeout(() => {
+  //       // Zoek het item in de database
+  //       const index = this._data.findIndex((user) => user.id === item.id);
+  //       if (index === -1) {
+  //         callback({ message: `Error: id ${item.id} does not exist!` }, null);
+  //       } else {
+  //         // Vervang het item in de database
+  //         this._data[index] = item;
+  //         callback(null, item);
+  //       }
+  //     }, this._delayTime);
+  //   },
 
   // Voeg zelf de overige database functionaliteit toe
 };

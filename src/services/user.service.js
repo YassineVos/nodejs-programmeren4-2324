@@ -28,18 +28,18 @@ const userService = {
     });
   },
 
-  update: (user, callback) => {
-    database.update(user, (err, data) => {
-      if (err) {
-        callback(err, null);
-      } else {
-        callback(null, {
-          message: `User with id ${data.id} updated.`,
-          data: data,
-        });
-      }
-    });
-  },
+  //   update: (user, callback) => {
+  //     database.update(user, (err, data) => {
+  //       if (err) {
+  //         callback(err, null);
+  //       } else {
+  //         callback(null, {
+  //           message: `User with id ${data.id} updated.`,
+  //           data: data,
+  //         });
+  //       }
+  //     });
+  //   },
 };
 
 module.exports = userService;

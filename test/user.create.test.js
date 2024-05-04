@@ -15,7 +15,17 @@ describe("UC201 Registreren als nieuwe user", () => {
    * Hiermee kun je code hergebruiken of initialiseren.
    */
   beforeEach((done) => {
-    console.log("Before each test");
+    const database = require("../src/dao/inmem-db");
+    // Assuming _data is accessible and can be reset
+    database._data = [
+      {
+        id: 0,
+        firstName: "Existing",
+        lastName: "User",
+        emailAdress: "existing@server.nl",
+      },
+    ];
+    database._index = 1; // Reset index if needed
     done();
   });
 
@@ -62,9 +72,24 @@ describe("UC201 Registreren als nieuwe user", () => {
   });
 
   it.skip("TC-201-4 Gebruiker bestaat al", (done) => {
-    //
-    // Hier schrijf je jouw testcase.
-    //
+    const duplicateUser = {
+      firstName: "New",
+      lastName: "User",
+      emailAdress: "existing@server.nl", // Same as the existing user
+    };
+
+    chai
+      .request(server)
+      .post("/api/users")
+      .send(duplicateUser)
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.be.an("object");
+        expect(res.body)
+          .to.have.property("message")
+          .equals("Error: Email already exists!");
+        done();
+      });
     done();
   });
 

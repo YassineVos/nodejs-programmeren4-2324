@@ -6,64 +6,87 @@
 // Opdracht: Voeg de overige methoden toe.
 //
 const database = {
-    // het array met dummy records. Dit is de 'database'.
-    _data: [
-        {
-            id: 0,
-            firstName: 'Hendrik',
-            lastName: 'van Dam',
-            emailAdress: 'hvd@server.nl'
-            // Hier de overige velden uit het functioneel ontwerp
-        },
-        {
-            id: 1,
-            firstName: 'Marieke',
-            lastName: 'Jansen',
-            emailAdress: 'm@server.nl'
-            // Hier de overige velden uit het functioneel ontwerp
-        }
-    ],
-
-    // Ieder nieuw item in db krijgt 'autoincrement' index.
-    // Je moet die wel zelf toevoegen aan ieder nieuw item.
-    _index: 2,
-    _delayTime: 500,
-
-    getAll(callback) {
-        // Simuleer een asynchrone operatie
-        setTimeout(() => {
-            // Roep de callback aan, en retourneer de data
-            callback(null, this._data)
-        }, this._delayTime)
+  // het array met dummy records. Dit is de 'database'.
+  _data: [
+    {
+      id: 0,
+      firstName: "Hendrik",
+      lastName: "van Dam",
+      emailAdress: "hvd@server.nl",
+      // Hier de overige velden uit het functioneel ontwerp
     },
-
-    getById(id, callback) {
-        // Simuleer een asynchrone operatie
-        setTimeout(() => {
-            if (id < 0 || id >= this._data.length) {
-                callback({ message: `Error: id ${id} does not exist!` }, null)
-            } else {
-                callback(null, this._data[id])
-            }
-        }, this._delayTime)
+    {
+      id: 1,
+      firstName: "Marieke",
+      lastName: "Jansen",
+      emailAdress: "m@server.nl",
+      // Hier de overige velden uit het functioneel ontwerp
     },
+  ],
 
-    add(item, callback) {
-        // Simuleer een asynchrone operatie
-        setTimeout(() => {
-            // Voeg een id toe en voeg het item toe aan de database
-            item.id = this._index++
-            // Voeg item toe aan de array
-            this._data.push(item)
+  // Ieder nieuw item in db krijgt 'autoincrement' index.
+  // Je moet die wel zelf toevoegen aan ieder nieuw item.
+  _index: 2,
+  _delayTime: 500,
 
-            // Roep de callback aan het einde van de operatie
-            // met het toegevoegde item als argument, of null als er een fout is opgetreden
-            callback(null, item)
-        }, this._delayTime)
-    }
+  getAll(callback) {
+    // Simuleer een asynchrone operatie
+    setTimeout(() => {
+      // Roep de callback aan, en retourneer de data
+      callback(null, this._data);
+    }, this._delayTime);
+  },
 
-    // Voeg zelf de overige database functionaliteit toe
-}
+  getById(id, callback) {
+    // Simuleer een asynchrone operatie
+    setTimeout(() => {
+      if (id < 0 || id >= this._data.length) {
+        callback({ message: `Error: id ${id} does not exist!` }, null);
+      } else {
+        callback(null, this._data[id]);
+      }
+    }, this._delayTime);
+  },
 
-module.exports = database
+  add(item, callback) {
+    // Simuleer een asynchrone operatie
+    setTimeout(() => {
+      // Voeg een id toe en voeg het item toe aan de database
+      const emailExists = this._data.some(
+        (user) => user.emailAdress === item.emailAdress
+      );
+      item.id = this._index++;
+      // Voeg item toe aan de array
+      if (emailExists) {
+        callback(
+          { message: `Error: email ${item.emailAdress} already exists!` },
+          null
+        );
+      } else {
+        item.id = this._index++;
+        this._data.push(item);
+        callback(null, item);
+      }
+    }, this._delayTime);
+  },
+
+  update(item, callback) {
+    // Simuleer een asynchrone operatie
+    setTimeout(() => {
+      // Zoek het item in de database
+      const index = this._data.findIndex((user) => user.id === item.id);
+      if (index === -1) {
+        callback({ message: `Error: id ${item.id} does not exist!` }, null);
+      } else {
+        // Vervang het item in de database
+        this._data[index] = item;
+        callback(null, item);
+      }
+    }, this._delayTime);
+  },
+
+  // Voeg zelf de overige database functionaliteit toe
+};
+
+module.exports = database;
 // module.exports = database.index;

@@ -1,7 +1,8 @@
+const { add } = require('../dao/inmem-db')
 const userService = require('../services/user.service')
 
 let userController = {
-    create: (req, res, next) => {
+    add: (req, res, next) => {
         const user = req.body
         //
         // Todo: Validate user input

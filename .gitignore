@@ -23,3 +23,6 @@
 secrets.txt
 credentials.json
 *.PublishSettings
+
+# Ignore the entire test directory
+/test/

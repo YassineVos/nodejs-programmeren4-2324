@@ -69,7 +69,7 @@ describe("UC201 Registreren als nieuwe user", () => {
       });
   });
 
-  it.skip("TC-201-3 Niet-valide password", (done) => {});
+  // it.skip("TC-201-3 Niet-valide password", (done) => {});
 
   it("TC-201-4 Gebruiker bestaat al", (done) => {
     // First, create a user to populate the database

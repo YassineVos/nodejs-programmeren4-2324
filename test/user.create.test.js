@@ -118,4 +118,29 @@ describe("UC201 Registreren als nieuwe user", () => {
         done();
       });
   });
+
+  // New tests for fetching a user by ID
+  describe("UC202 Retrieve user by ID", () => {
+    it("should return a user by their ID when valid ID is provided", (done) => {
+      chai
+        .request(server)
+        .get("/api/users/0") // Assuming there is a user with ID 0
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.data).to.have.property("id").eql(0);
+          done();
+        });
+    });
+
+    it("should return 404 when non-existing ID is provided", (done) => {
+      chai
+        .request(server)
+        .get("/api/users/999") // Assuming no user with ID 999
+        .end((err, res) => {
+          expect(res).to.have.status(404);
+          done();
+        });
+    });
+  });
 });

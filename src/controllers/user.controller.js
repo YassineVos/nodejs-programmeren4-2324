@@ -45,7 +45,7 @@ let userController = {
   },
 
   getById: (req, res, next) => {
-    const userId = req.params.userId;
+    const userId = parseInt(req.params.userId);
     userService.getById(userId, (error, success) => {
       if (error) {
         return next({

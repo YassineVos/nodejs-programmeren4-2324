@@ -2,6 +2,7 @@ const chai = require("chai");
 const chaiHttp = require("chai-http");
 const server = require("../index");
 const tracer = require("tracer");
+const expect = chai.expect;
 
 chai.should();
 chai.use(chaiHttp);
@@ -15,7 +16,6 @@ describe("UC201 Registreren als nieuwe user", () => {
    * Hiermee kun je code hergebruiken of initialiseren.
    */
   beforeEach((done) => {
-    console.log("Before each test");
     done();
   });
 
@@ -42,7 +42,7 @@ describe("UC201 Registreren als nieuwe user", () => {
         chai
           .expect(res.body)
           .to.have.property("message")
-          .equals("Missing or incorrect firstName field");
+          .equals("Missing first name");
         chai.expect(res.body).to.have.property("data").that.is.a("object").that
           .is.empty;
 
@@ -50,22 +50,61 @@ describe("UC201 Registreren als nieuwe user", () => {
       });
   });
 
-  it.skip("TC-201-2 Niet-valide email adres", (done) => {
-    done();
+  it("TC-201-2 Niet-valide email adres", (done) => {
+    chai
+      .request(server)
+      .post("/api/users")
+      .send({
+        firstName: "Jan", // Valid first name
+        lastName: "De Boer", // Valid last name
+        emailAdress: "jan.de.boer", // Invalid email, missing domain
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.be.an("object");
+        expect(res.body)
+          .to.have.property("message")
+          .eql("Invalid email address");
+        done();
+      });
   });
 
-  it.skip("TC-201-3 Niet-valide password", (done) => {
-    //
-    // Hier schrijf je jouw testcase.
-    //
-    done();
-  });
+  it.skip("TC-201-3 Niet-valide password", (done) => {});
 
-  it.skip("TC-201-4 Gebruiker bestaat al", (done) => {
-    //
-    // Hier schrijf je jouw testcase.
-    //
-    done();
+  it("TC-201-4 Gebruiker bestaat al", (done) => {
+    // First, create a user to populate the database
+    chai
+      .request(server)
+      .post("/api/users")
+      .send({
+        firstName: "Existing",
+        lastName: "User",
+        emailAdress: "existing.user@example.com",
+      })
+      .end((err, res) => {
+        // Ensure the user was created successfully
+        expect(res).to.have.status(200);
+
+        // Attempt to create the same user again
+        chai
+          .request(server)
+          .post("/api/users")
+          .send({
+            firstName: "Existing",
+            lastName: "User",
+            emailAdress: "existing.user@example.com",
+          })
+
+          .end((err, res) => {
+            // Expect a failure due to duplicate email
+            expect(res).to.have.status(400);
+            expect(res.body).to.be.an("object");
+            expect(res.body)
+              .to.have.property("message")
+              .eql("User already exists");
+            done();
+          });
+      });
   });
 
   it("TC-201-5 Gebruiker succesvol geregistreerd", (done) => {

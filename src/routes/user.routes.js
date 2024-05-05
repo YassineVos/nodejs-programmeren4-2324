@@ -14,54 +14,21 @@ const notFound = (req, res, next) => {
   });
 };
 
-// Input validation functions for user routes
-const validateUserCreate = (req, res, next) => {
-  if (!req.body.emailAdress || !req.body.firstName || !req.body.lastName) {
-    return res.status(400).json({
-      status: 400,
-      message: "Missing required fields",
-      data: {},
-    });
-  }
-  next();
-};
-
 // Input validation function 2 met gebruik van assert
 const validateUserCreateAssert = (req, res, next) => {
   try {
     assert(req.body.emailAdress, "Missing email");
     assert(req.body.firstName, "Missing first name");
     assert(req.body.lastName, "Missing last name");
-    next();
-  } catch (ex) {
-    return res.status(400).json({
-      status: 400,
-      message: ex.message,
-      data: {},
-    });
-  }
-};
 
-// Input validation function 2 met gebruik van assert
-const validateUserCreateChaiShould = (req, res, next) => {
-  try {
-    req.body.firstName.should.not.be.empty.and.a("string");
-    req.body.lastName.should.not.be.empty.and.a("string");
-    req.body.emailAdress.should.not.be.empty.and.a("string").and.match(/@/);
-    next();
-  } catch (ex) {
-    return res.status(400).json({
-      status: 400,
-      message: ex.message,
-      data: {},
-    });
-  }
-};
+    //validate email format
+    assert(
+      req.body.emailAdress.match(
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+      ),
+      "Invalid email address"
+    );
 
-const validateUserCreateChaiExpect = (req, res, next) => {
-  try {
-    chai.expect(req.body.firstName).to.not.be.empty;
-    chai.expect(req.body.firstName).to.be.a("string");
     next();
   } catch (ex) {
     return res.status(400).json({
@@ -73,7 +40,7 @@ const validateUserCreateChaiExpect = (req, res, next) => {
 };
 
 // Userroutes
-router.post("/api/users", userController.add);
+router.post("/api/users", validateUserCreateAssert, userController.add);
 router.get("/api/users", userController.getAll);
 router.get("/api/users/:userId", userController.getById);
 

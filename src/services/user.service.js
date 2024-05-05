@@ -1,16 +1,27 @@
 const database = require("../dao/inmem-db");
 
 const userService = {
-  add: (user, callback) => {
-    database.add(user, (err, data) => {
+  create: (user, callback) => {
+    database.findByEmail(user.emailAdress, (err, existingUser) => {
       if (err) {
-        callback(err, null);
-      } else {
+        return callback(err);
+      }
+      if (existingUser) {
+        const error = new Error("User already exists");
+        error.status = 400; // Set a specific status code for this error
+        return callback(error); // Return this error with its status
+      }
+
+      // If no user exists with that email, proceed to add the new user
+      database.add(user, (err, data) => {
+        if (err) {
+          return callback(err); // Ensure errors here are also properly handled
+        }
         callback(null, {
           message: `User created with id ${data.id}.`,
           data: data,
         });
-      }
+      });
     });
   },
 
@@ -22,19 +33,6 @@ const userService = {
         console.log(data);
         callback(null, {
           message: `Found ${data.length} users.`,
-          data: data,
-        });
-      }
-    });
-  },
-
-  getById: (id, callback) => {
-    database.getById(id, (err, data) => {
-      if (err) {
-        callback(err, null);
-      } else {
-        callback(null, {
-          message: `Found user with id ${id}.`,
           data: data,
         });
       }

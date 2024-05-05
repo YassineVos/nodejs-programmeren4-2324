@@ -52,38 +52,26 @@ const database = {
     // Simuleer een asynchrone operatie
     setTimeout(() => {
       // Voeg een id toe en voeg het item toe aan de database
-      const emailExists = this._data.some(
-        (user) => user.emailAdress === item.emailAdress
-      );
       item.id = this._index++;
       // Voeg item toe aan de array
-      if (emailExists) {
-        callback(
-          { message: `Error: email ${item.emailAdress} already exists!` },
-          null
-        );
-      } else {
-        item.id = this._index++;
-        this._data.push(item);
-        callback(null, item);
-      }
+      this._data.push(item);
+
+      // Roep de callback aan het einde van de operatie
+      // met het toegevoegde item als argument, of null als er een fout is opgetreden
+      callback(null, item);
     }, this._delayTime);
   },
 
-  //   update(item, callback) {
-  //     // Simuleer een asynchrone operatie
-  //     setTimeout(() => {
-  //       // Zoek het item in de database
-  //       const index = this._data.findIndex((user) => user.id === item.id);
-  //       if (index === -1) {
-  //         callback({ message: `Error: id ${item.id} does not exist!` }, null);
-  //       } else {
-  //         // Vervang het item in de database
-  //         this._data[index] = item;
-  //         callback(null, item);
-  //       }
-  //     }, this._delayTime);
-  //   },
+  // Find user by email
+  findByEmail(email, callback) {
+    // Simuleer een asynchrone operatie
+    setTimeout(() => {
+      // Zoek de gebruiker in de database
+      const user = this._data.find((user) => user.emailAdress === email);
+      // Roep de callback aan met de gevonden gebruiker, of null als de gebruiker niet is gevonden
+      callback(null, user);
+    }, this._delayTime);
+  },
 
   // Voeg zelf de overige database functionaliteit toe
 };

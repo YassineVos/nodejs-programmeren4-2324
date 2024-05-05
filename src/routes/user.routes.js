@@ -73,7 +73,7 @@ const validateUserCreateChaiExpect = (req, res, next) => {
 };
 
 // Userroutes
-router.post("/api/users", userController.add);
+router.post("/api/users", validateUserCreateChaiShould, userController.add);
 router.get("/api/users", userController.getAll);
 router.get("/api/users/:userId", userController.getById);
 

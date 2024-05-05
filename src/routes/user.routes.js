@@ -19,7 +19,7 @@ const validateUserCreate = (req, res, next) => {
   if (!req.body.emailAdress || !req.body.firstName || !req.body.lastName) {
     return res.status(400).json({
       status: 400,
-      message: "Missing email or password",
+      message: "Missing required fields",
       data: {},
     });
   }
@@ -73,7 +73,7 @@ const validateUserCreateChaiExpect = (req, res, next) => {
 };
 
 // Userroutes
-router.post("/api/users", validateUserCreateChaiShould, userController.add);
+router.post("/api/users", userController.add);
 router.get("/api/users", userController.getAll);
 router.get("/api/users/:userId", userController.getById);
 

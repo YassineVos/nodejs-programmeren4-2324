@@ -40,10 +40,15 @@ const database = {
   getById(id, callback) {
     // Simuleer een asynchrone operatie
     setTimeout(() => {
-      if (id < 0 || id >= this._data.length) {
+      const numId = Number(id);
+
+      const item = this._data.find((item) => item.id === numId);
+
+      if (!item) {
         callback({ message: `Error: id ${id} does not exist!` }, null);
       } else {
-        callback(null, this._data[id]);
+        // Roep de callback aan met het gevonden item, of null als het item niet is gevonden
+        callback(null, item);
       }
     }, this._delayTime);
   },
@@ -76,12 +81,12 @@ const database = {
   update(id, newData, callback) {
     // Simuleer een asynchrone operatie
     setTimeout(() => {
-      if (id < 0 || id >= this._data.length) {
+      const numId = Number(id);
+      const item = this._data.find((item) => item.id === numId);
+
+      if (!item) {
         callback({ message: `Error: id ${id} does not exist!` }, null);
       } else {
-        // Vind het item met de opgegeven id
-        const item = this._data[id];
-
         // Update de velden met de nieuwe data
         Object.assign(item, newData);
 
@@ -93,9 +98,11 @@ const database = {
   },
 
   delete(id, callback) {
-    // Simuleer een asynchrone operatie
     setTimeout(() => {
-      if (id < 0 || id >= this._data.length) {
+      const numId = Number(id);
+      const item = this._data.find((item) => item.id === numId);
+
+      if (!item) {
         callback({ message: `Error: id ${id} does not exist!` }, null);
       } else {
         // Verwijder het item met de opgegeven id

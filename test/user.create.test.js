@@ -133,3 +133,98 @@ describe("UC201 Registreren als nieuwe user", () => {
       });
   });
 });
+
+const endpointToUpdate = "/api/user";
+
+describe("UC205 Update existing user", () => {
+  let userId; // Variable to store user ID for update tests
+
+  // Create a user to update in each test
+  beforeEach((done) => {
+    chai
+      .request(server)
+      .post("/api/user")
+      .send({
+        firstName: "Initial",
+        lastName: "User",
+        emailAdress: "initial.user@example.com",
+      })
+      .end((err, res) => {
+        userId = res.body.data.id; // Save the user id for use in tests
+        done();
+      });
+  });
+
+  afterEach((done) => {
+    // Clean up database after each test if necessary
+    done();
+  });
+  it("TC-202-1 Update with missing fields", (done) => {
+    chai
+      .request(server)
+      .put(`${endpointToUpdate}/${userId}`)
+      .send({ lastName: "Updated" }) // Intentionally missing firstName and email
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.be.an("object");
+        expect(res.body)
+          .to.have.property("message")
+          .eql("Missing required fields");
+        done();
+      });
+  });
+  it("TC-202-2 Update with invalid email address", (done) => {
+    chai
+      .request(server)
+      .put(`${endpointToUpdate}/${userId}`)
+      .send({
+        firstName: "Updated",
+        lastName: "User",
+        emailAdress: "updated.email",
+      }) // Invalid email
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.be.an("object");
+        expect(res.body)
+          .to.have.property("message")
+          .eql("Invalid email address");
+        done();
+      });
+  });
+  it("TC-202-3 Valid update", (done) => {
+    chai
+      .request(server)
+      .put(`${endpointToUpdate}/${userId}`)
+      .send({
+        firstName: "Updated",
+        lastName: "User",
+        emailAdress: "updated.user@example.com",
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.an("object");
+        expect(res.body.data).to.include({
+          firstName: "Updated",
+          lastName: "User",
+          emailAdress: "updated.user@example.com",
+        });
+        done();
+      });
+  });
+  it("TC-202-4 Update non-existing user", (done) => {
+    chai
+      .request(server)
+      .put(`${endpointToUpdate}/999999`) // Assuming 999999 is an ID that does not exist
+      .send({
+        firstName: "NonExistent",
+        lastName: "User",
+        emailAdress: "nonexistent.user@example.com",
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(404);
+        expect(res.body).to.be.an("object");
+        expect(res.body).to.have.property("message").eql("User not found");
+        done();
+      });
+  });
+});

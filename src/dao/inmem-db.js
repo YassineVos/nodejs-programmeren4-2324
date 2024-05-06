@@ -73,6 +73,41 @@ const database = {
     }, this._delayTime);
   },
 
+  update(id, newData, callback) {
+    // Simuleer een asynchrone operatie
+    setTimeout(() => {
+      if (id < 0 || id >= this._data.length) {
+        callback({ message: `Error: id ${id} does not exist!` }, null);
+      } else {
+        // Vind het item met de opgegeven id
+        const item = this._data[id];
+
+        // Update de velden met de nieuwe data
+        Object.assign(item, newData);
+
+        // Roep de callback aan het einde van de operatie
+        // met het bijgewerkte item als argument, of null als er een fout is opgetreden
+        callback(null, item);
+      }
+    }, this._delayTime);
+  },
+
+  delete(id, callback) {
+    // Simuleer een asynchrone operatie
+    setTimeout(() => {
+      if (id < 0 || id >= this._data.length) {
+        callback({ message: `Error: id ${id} does not exist!` }, null);
+      } else {
+        // Verwijder het item met de opgegeven id
+        const item = this._data.splice(id, 1)[0];
+
+        // Roep de callback aan het einde van de operatie
+        // met het verwijderde item als argument, of null als er een fout is opgetreden
+        callback(null, item);
+      }
+    }, this._delayTime);
+  },
+
   // Voeg zelf de overige database functionaliteit toe
 };
 

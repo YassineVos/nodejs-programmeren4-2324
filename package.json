@@ -6,7 +6,7 @@
     "build": "npm install",
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "mocha test/*.js"
+    "test": "No tests specified yet"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -26,3 +26,4 @@
     "nodemon": "^3.1.0"
   }
 }
+2

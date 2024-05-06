@@ -1,3 +1,4 @@
+const { update } = require("../controllers/user.controller");
 const database = require("../dao/inmem-db");
 
 const userService = {
@@ -35,6 +36,61 @@ const userService = {
           message: `Found ${data.length} users.`,
           data: data,
         });
+      }
+    });
+  },
+
+  // Add the getById method to the userService object
+  getById: (userId, callback) => {
+    database.getById(userId, (err, data) => {
+      if (err) {
+        callback(err, null);
+      } else {
+        callback(null, {
+          message: `Found user with id ${userId}.`,
+          data: data,
+        });
+      }
+    });
+  },
+
+  update: (id, updatedUser, callback) => {
+    database.update(id, updatedUser, (err, data) => {
+      if (err) {
+        callback(err, null);
+      } else {
+        if (data) {
+          callback(null, {
+            message: `User updated with id ${id}.`,
+            data: data,
+          });
+        } else {
+          callback(null, {
+            message: `User not found with id ${id}.`,
+            data: null,
+          });
+        }
+      }
+    });
+  },
+
+  // Add the delete method to the userService object
+  delete: (userId, callback) => {
+    database.delete(userId, (err, data) => {
+      if (err) {
+        callback(err, null);
+      } else {
+        if (data) {
+          callback(null, {
+            message: `User deleted with id ${userId}.`,
+            data: data,
+          });
+        } else {
+          callback(null, {
+            message: `User not found with id ${userId}.`,
+            data: null,
+          });
+        }
       }
     });
   },

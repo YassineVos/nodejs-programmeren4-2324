@@ -1,5 +1,5 @@
 const { update } = require("../controllers/user.controller");
-const database = require("../dao/inmem-db");
+const database = require("../dao/mysql-db");
 
 const userService = {
   create: (user, callback) => {

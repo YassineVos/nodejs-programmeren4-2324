@@ -87,7 +87,16 @@ const mysqlDb = {
   deleteUser(id, callback) {
     pool.query("DELETE FROM user WHERE id = ?", [id], (err, result) => {
       if (err) {
-        callback(err, null);
+        // Check for foreign key constraint error
+        if (err.code === "ER_ROW_IS_REFERENCED_2") {
+          return callback(
+            {
+              status: 409, // Conflict
+              message: `Cannot delete user with ID ${id} because of a foreign key conflict.`,
+            },
+            null
+          );
+        }
       } else {
         if (result.affectedRows) {
           callback(null, {

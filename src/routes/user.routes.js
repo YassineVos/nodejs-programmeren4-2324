@@ -32,8 +32,14 @@ const validateUserCreateAssert = (req, res, next) => {
 // Define user routes
 router.post("/user", validateUserCreateAssert, userController.add);
 router.get("/user", validateToken, userController.getAll);
+router.get("/user/profile", validateToken, userController.getProfile);
 router.get("/user/:userId", validateToken, userController.getById);
-router.put("/user/:userId", validateToken, userController.update);
+router.put(
+  "/user/:userId",
+  validateToken,
+  validateUserCreateAssert,
+  userController.update
+);
 router.delete("/user/:userId", validateToken, userController.delete);
 
 module.exports = router;

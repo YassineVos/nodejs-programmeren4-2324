@@ -1,4 +1,4 @@
-const { update } = require("../controllers/user.controller");
+// const { update } = require("../controllers/user.controller");
 const database = require("../dao/mysql-db");
 
 const userService = {

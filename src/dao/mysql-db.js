@@ -135,6 +135,16 @@ const mysqlDb = {
       callback(null, results[0]);
     });
   },
+
+  getConnection: (callback) => {
+    pool.getConnection((err, connection) => {
+      if (err) {
+        console.error("Error getting connection from pool", err);
+        return callback(err, null);
+      }
+      callback(null, connection);
+    });
+  },
 };
 
 module.exports = mysqlDb;

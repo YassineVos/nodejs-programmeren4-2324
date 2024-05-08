@@ -4,6 +4,7 @@ const chai = require("chai");
 chai.should();
 const router = express.Router();
 const userController = require("../controllers/user.controller");
+const AuthController = require("../controllers/authentication.controller");
 
 // Tijdelijke functie om niet bestaande routes op te vangen
 const notFound = (req, res, next) => {
@@ -47,5 +48,7 @@ router.get("/api/user/:userId", userController.getById);
 // Tijdelijke routes om niet bestaande routes op te vangen
 router.put("/api/user/:userId", userController.update);
 router.delete("/api/user/:userId", userController.delete);
+
+router.post("/api/login", AuthController.login);
 
 module.exports = router;

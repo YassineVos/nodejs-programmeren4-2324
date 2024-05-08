@@ -23,9 +23,9 @@ app.get("/", function (req, res) {
 app.get("/api/info", (req, res) => {
   console.log("GET /api/info");
   const info = {
-    name: "My Nodejs Express server",
-    version: "0.0.1",
-    description: "This is a simple Nodejs Express server",
+    studentName: "Yessin Boukrach",
+    studentNumber: "2206857",
+    description: "This is the API for the Share a Meal app.",
   };
   res.json(info);
 });

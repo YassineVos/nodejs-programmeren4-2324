@@ -1,5 +1,5 @@
 const mysql = require("mysql2");
-const logger = require("../../src/util/logger");
+const logger = require("../nodejs-programmeren4-2324/src/util/logger");
 require("dotenv").config();
 
 // Set the log level to the value of the LOG_LEVEL environment variable

@@ -24,10 +24,10 @@ function validateToken(req, res, next) {
   logger.trace("Headers:", req.headers);
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    logger.warn("Authorization header missing!");
+    logger.warn("No token provided!");
     next({
       status: 401,
-      message: "Authorization header missing!",
+      message: "No token provided!",
       data: {},
     });
   } else {
@@ -35,10 +35,10 @@ function validateToken(req, res, next) {
 
     jwt.verify(token, jwtSecretKey, (err, payload) => {
       if (err) {
-        logger.warn("Not authorized");
+        logger.warn("Token invalid!");
         next({
           status: 401,
-          message: "Not authorized!",
+          message: "Token invalid!",
           data: {},
         });
       }

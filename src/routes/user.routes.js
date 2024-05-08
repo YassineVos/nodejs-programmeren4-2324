@@ -2,6 +2,7 @@ const express = require("express");
 const assert = require("assert");
 const router = express.Router();
 const userController = require("../controllers/user.controller");
+const { validateToken } = require("./authentication.routes");
 
 // Validation middleware for user creation
 const validateUserCreateAssert = (req, res, next) => {
@@ -29,10 +30,10 @@ const validateUserCreateAssert = (req, res, next) => {
 };
 
 // Define user routes
-router.post("/", validateUserCreateAssert, userController.add);
-router.get("/", userController.getAll);
-router.get("/:userId", userController.getById);
-router.put("/:userId", userController.update);
-router.delete("/:userId", userController.delete);
+router.post("/user", validateUserCreateAssert, userController.add);
+router.get("/user", userController.getAll);
+router.get("/user/:userId", validateToken, userController.getById);
+router.put("/user/:userId", validateToken, userController.update);
+router.delete("/user/:userId", validateToken, userController.delete);
 
 module.exports = router;

@@ -10,13 +10,7 @@ const app = express();
 app.use(express.json());
 
 // Add authentication routes before other protected routes
-app.use("/api/auth", authRoutes);
-
-// Add public user routes (e.g., create user)
-app.use("/api/user", userRoutes);
-
-// Apply token validation middleware to other routes requiring authorization
-app.use(validateToken);
+app.use("/api", authRoutes);
 
 // Public info endpoint
 app.get("/api/info", (req, res) => {

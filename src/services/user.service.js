@@ -1,9 +1,9 @@
-const { update } = require("../controllers/user.controller");
-const database = require("../dao/inmem-db");
+// const { update } = require("../controllers/user.controller");
+const database = require("../dao/mysql-db");
 
 const userService = {
   create: (user, callback) => {
-    database.findByEmail(user.emailAdress, (err, existingUser) => {
+    database.getUserByEmail(user.emailAdress, (err, existingUser) => {
       if (err) {
         return callback(err);
       }
@@ -14,7 +14,7 @@ const userService = {
       }
 
       // If no user exists with that email, proceed to add the new user
-      database.add(user, (err, data) => {
+      database.addUser(user, (err, data) => {
         if (err) {
           return callback(err); // Ensure errors here are also properly handled
         }
@@ -42,7 +42,7 @@ const userService = {
 
   // Add the getById method to the userService object
   getById: (userId, callback) => {
-    database.getById(userId, (err, data) => {
+    database.getUserById(userId, (err, data) => {
       if (err) {
         callback(err, null);
       } else {
@@ -55,7 +55,7 @@ const userService = {
   },
 
   update: (id, updatedUser, callback) => {
-    database.update(id, updatedUser, (err, data) => {
+    database.updateUser(id, updatedUser, (err, data) => {
       if (err) {
         callback(err, null);
       } else {
@@ -76,7 +76,7 @@ const userService = {
 
   // Add the delete method to the userService object
   delete: (userId, callback) => {
-    database.delete(userId, (err, data) => {
+    database.deleteUser(userId, (err, data) => {
       if (err) {
         callback(err, null);
       } else {

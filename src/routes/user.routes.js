@@ -1,27 +1,17 @@
 const express = require("express");
 const assert = require("assert");
-const chai = require("chai");
-chai.should();
 const router = express.Router();
 const userController = require("../controllers/user.controller");
+const { validateToken } = require("./authentication.routes");
 
-// Tijdelijke functie om niet bestaande routes op te vangen
-const notFound = (req, res, next) => {
-  res.status(404).json({
-    status: 404,
-    message: "Route not found",
-    data: {},
-  });
-};
-
-// Input validation function 2 met gebruik van assert
+// Validation middleware for user creation
 const validateUserCreateAssert = (req, res, next) => {
   try {
     assert(req.body.emailAdress, "Missing email");
     assert(req.body.firstName, "Missing first name");
     assert(req.body.lastName, "Missing last name");
 
-    //validate email format
+    // Validate email format
     assert(
       req.body.emailAdress.match(
         /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
@@ -39,13 +29,11 @@ const validateUserCreateAssert = (req, res, next) => {
   }
 };
 
-// Userroutes
-router.post("/api/user", validateUserCreateAssert, userController.add);
-router.get("/api/user", userController.getAll);
-router.get("/api/user/:userId", userController.getById);
-
-// Tijdelijke routes om niet bestaande routes op te vangen
-router.put("/api/user/:userId", userController.update);
-router.delete("/api/user/:userId", userController.delete);
+// Define user routes
+router.post("/user", validateUserCreateAssert, userController.add);
+router.get("/user", validateToken, userController.getAll);
+router.get("/user/:userId", validateToken, userController.getById);
+router.put("/user/:userId", validateToken, userController.update);
+router.delete("/user/:userId", validateToken, userController.delete);
 
 module.exports = router;

@@ -1,4 +1,4 @@
-const { add } = require("../dao/inmem-db");
+const { add } = require("../dao/mysql-db");
 const userService = require("../services/user.service");
 
 let userController = {

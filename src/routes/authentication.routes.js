@@ -7,6 +7,9 @@ const logger = require("../util/logger");
 
 function validateLogin(req, res, next) {
   try {
+    if (!req.body.emailAdress || !req.body.password) {
+      throw new Error("email and password are required.");
+    }
     assert(typeof req.body.emailAdress === "string", "email must be a string.");
     assert(typeof req.body.password === "string", "password must be a string.");
     next();

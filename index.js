@@ -12,6 +12,9 @@ app.use(express.json());
 // Add authentication routes before other protected routes
 app.use("/api", authRoutes);
 
+// Add public user routes (e.g., create user)
+app.use("/api", userRoutes);
+
 // Public info endpoint
 app.get("/api/info", (req, res) => {
   const info = {

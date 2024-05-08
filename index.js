@@ -2,11 +2,20 @@ require("dotenv").config();
 
 const express = require("express");
 const userRoutes = require("./src/routes/user.routes");
-
+const {
+  routes: authRoutes,
+  validateToken,
+} = require("./src/routes/authentication.routes");
 const app = express();
 
 // express.json zorgt dat we de body van een request kunnen lezen
 app.use(express.json());
+
+// Add authentication routes before the other protected routes
+app.use("/api/auth", authRoutes);
+
+// Add other routes requiring authentication after validating the token
+app.use(validateToken);
 app.use("/api", userRoutes);
 
 const port = process.env.PORT || 3000;
@@ -30,10 +39,7 @@ app.get("/api/info", (req, res) => {
   res.json(info);
 });
 
-// Hier komen alle routes
-app.use(userRoutes);
-
-// Hier komt de route error handler te staan!
+// Error handler for undefined routes
 app.use((req, res, next) => {
   next({
     status: 404,
@@ -42,7 +48,7 @@ app.use((req, res, next) => {
   });
 });
 
-// Hier komt je Express error handler te staan!
+// General Express error handler
 app.use((error, req, res, next) => {
   res.status(error.status || 500).json({
     status: error.status || 500,
@@ -55,5 +61,5 @@ app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-// Deze export is nodig zodat Chai de server kan opstarten
+// Export for Chai to start the server
 module.exports = app;

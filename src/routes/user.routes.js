@@ -49,6 +49,6 @@ router.get("/api/user/:userId", userController.getById);
 router.put("/api/user/:userId", userController.update);
 router.delete("/api/user/:userId", userController.delete);
 
-router.post("/api/login", AuthController.login);
+// router.post("/api/login", AuthController.login);
 
 module.exports = router;

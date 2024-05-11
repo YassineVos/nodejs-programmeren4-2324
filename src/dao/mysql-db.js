@@ -3,10 +3,18 @@ const pool = require("../../mysql-pool-example");
 const mysqlDb = {
   // Add a new user
   addUser(user, callback) {
+    if (user.id !== undefined || user.isActive !== undefined) {
+      return callback(
+        new Error(
+          "Invalid fields: 'id' or 'isActive' should not be manually set."
+        ),
+        null
+      );
+    }
     const sql = `
         INSERT INTO user 
-        (firstName, lastName, emailAdress, password, phoneNumber, roles, street, city, isActive) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (firstName, lastName, emailAdress, password, phoneNumber, roles, street, city) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const values = [
       user.firstName,
@@ -17,13 +25,13 @@ const mysqlDb = {
       user.roles,
       user.street,
       user.city,
-      user.isActive,
     ];
     pool.query(sql, values, (err, result) => {
       if (err) {
         callback(err, null);
       } else {
         user.id = result.insertId;
+        user.isActive = true;
         callback(null, user);
       }
     });

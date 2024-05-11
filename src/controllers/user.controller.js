@@ -5,9 +5,7 @@ const userService = require("../services/user.service");
 let userController = {
   add: (req, res, next) => {
     const user = req.body;
-    //
-    // Todo: Validate user input
-    //
+
     userService.create(user, (error, success) => {
       if (error) {
         return next({

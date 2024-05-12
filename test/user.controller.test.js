@@ -16,31 +16,6 @@ const testToken = process.env.JWT_TEST_TOKEN;
 chai.should();
 chai.use(chaiHttp);
 
-const CLEAR_MEAL_TABLE = "DELETE FROM `meal`;";
-const CLEAR_PARTICIPANTS_TABLE = "DELETE FROM `meal_participants_user`;";
-const CLEAR_USERS_TABLE = "DELETE FROM `user`;";
-const CLEAR_DB = `
-  SET FOREIGN_KEY_CHECKS = 0;
-  DELETE FROM \`meal\`;
-  DELETE FROM \`meal_participants_user\`;
-  DELETE FROM \`user\`;
-  SET FOREIGN_KEY_CHECKS = 1;
-`;
-
-const INSERT_USER_1 =
-  "INSERT INTO `user` (`id`, `firstName`, `lastName`, `emailAdress`, `password`, `street`, `city` ) VALUES" +
-  '(10, "first", "last", "TEST1@avans.nl", "secret", "street", "city");';
-
-const INSERT_USER_2 =
-  "INSERT INTO `user` (`id`, `firstName`, `lastName`, `emailAdress`, `password`, `street`, `city` ) VALUES" +
-  '(11, "test", "test", "TEST2@avans.nl", "secret", "test", "test");';
-
-const INSERT_USER_3 =
-  "INSERT INTO `user` (`id`, `firstName`, `lastName`, `emailAdress`, `password`, `street`, `city` ) VALUES" +
-  '(6, "Yessin", "Boukrach", "ffff@server.nl", "secret", "test", "test");';
-
-const INSERT_USERS = INSERT_USER_1 + INSERT_USER_2 + INSERT_USER_3;
-
 function createLoginToken(server, loginDetails, done) {
   chai
     .request(server)
@@ -57,14 +32,6 @@ function createLoginToken(server, loginDetails, done) {
 
 describe("UC-User", () => {
   describe("UC-101 login", () => {
-    beforeEach((done) => {
-      // Maak testdatabase leeg zodat we testen kunnen uitvoeren
-      pool.query(CLEAR_DB + INSERT_USERS, function (err) {
-        if (err) throw err;
-
-        done();
-      });
-    });
     it("TC-101-1 When a required input is missing, a valid error should be returned", (done) => {
       chai
         .request(server)
@@ -181,5 +148,36 @@ describe("UC-User", () => {
 
         done();
       });
+  });
+
+  describe("UC-102 register", () => {
+    it("TC-201-1 When a required input is missing, a valid error should be returned", (done) => {
+      chai
+        .request(server)
+        .post("/api/user")
+        .send({
+          firstName: "John",
+          //lastName is missing
+          emailAdress: "johndoe@server.com",
+          password: "secret",
+          street: "Mainstreet",
+          city: "New York",
+        })
+        .end((err, res) => {
+          assert.ifError(err);
+
+          res.should.have.status(400);
+          res.should.be.an("object");
+          res.body.should.be
+            .an("object")
+            .that.has.all.keys("status", "message", "data");
+
+          let { status, message } = res.body;
+          status.should.be.a("number");
+          message.should.be.a("string").that.equals("Missing last name");
+
+          done();
+        });
+    });
   });
 });

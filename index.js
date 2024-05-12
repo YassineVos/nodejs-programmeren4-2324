@@ -14,11 +14,10 @@ app.use(express.json());
 
 // Add authentication routes before other protected routes
 app.use("/api", authRoutes);
-
-// Add other routes requiring authentication after validating the token
-app.use(validateToken);
 app.use("/api/meal", mealRoutes);
 app.use("/api", userRoutes);
+
+app.use(validateToken);
 
 const port = process.env.PORT || 3000;
 

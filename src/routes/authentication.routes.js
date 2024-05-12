@@ -37,8 +37,6 @@ function validateLogin(req, res, next) {
 }
 
 function validateToken(req, res, next) {
-  logger.info("validateToken called");
-  logger.trace("Headers:", req.headers);
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     logger.warn("No token provided!");
@@ -60,7 +58,6 @@ function validateToken(req, res, next) {
         });
       }
       if (payload) {
-        logger.debug("token is valid", payload);
         req.userId = payload.userId;
         next();
       }

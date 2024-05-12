@@ -180,4 +180,68 @@ describe("UC-User", () => {
         });
     });
   });
+  it("TC-201-5 When a user is created successfully a valid response should be returned", (done) => {
+    chai
+      .request(server)
+      .post("/api/user")
+      .send({
+        firstName: "John",
+        lastName: "Doe",
+        emailAdress: "voorbeeld@server.com",
+        password: "secret",
+        phoneNumber: "123456789",
+        street: "Mainstreet",
+        city: "New York",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(200);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`User created with id ${data.id}.`);
+        data.should.be
+          .an("object")
+          .that.includes.keys(
+            "id",
+            "firstName",
+            "lastName",
+            "emailAdress",
+            "street",
+            "city"
+          );
+
+        chai
+          .request(server)
+          .post("/api/login")
+          .send({
+            emailAdress: "voorbeeld@server.com",
+            password: "secret",
+          })
+          .end((loginErr, loginRes) => {
+            if (loginErr) return done(loginErr);
+
+            loginRes.should.have.status(200); // Ensure login was successful
+            let token = loginRes.body.data.token; // Capture the token
+
+            // Use the token to authorize a delete request
+            chai
+              .request(server)
+              .delete(`/api/user/${data.id}`)
+              .set("Authorization", `Bearer ${token}`) // Set the authorization header with the token
+              .end((deleteErr, deleteRes) => {
+                if (deleteErr) return done(deleteErr);
+                deleteRes.should.have.status(200); // Assure that the delete operation was successful
+                done();
+              });
+          });
+      });
+  });
 });

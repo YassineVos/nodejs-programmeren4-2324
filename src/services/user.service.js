@@ -19,6 +19,7 @@ const userService = {
           return callback(err); // Ensure errors here are also properly handled
         }
         callback(null, {
+          status: 200,
           message: `User created with id ${data.id}.`,
           data: data,
         });

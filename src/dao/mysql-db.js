@@ -5,8 +5,8 @@ const mysqlDb = {
   addUser(user, callback) {
     const sql = `
         INSERT INTO user 
-        (firstName, lastName, emailAdress, password, phoneNumber, roles, street, city, isActive) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (firstName, lastName, emailAdress, password, phoneNumber, street, city) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     const values = [
       user.firstName,
@@ -14,10 +14,8 @@ const mysqlDb = {
       user.emailAdress,
       user.password,
       user.phoneNumber,
-      user.roles,
       user.street,
       user.city,
-      user.isActive,
     ];
     pool.query(sql, values, (err, result) => {
       if (err) {

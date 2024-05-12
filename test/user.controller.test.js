@@ -30,33 +30,31 @@ function createLoginToken(server, loginDetails, done) {
     });
 }
 
-describe("UC-User", () => {
-  describe("UC-101 login", () => {
-    it("TC-101-1 When a required input is missing, a valid error should be returned", (done) => {
-      chai
-        .request(server)
-        .post("/api/login")
-        .auth(testToken, { type: "bearer" })
-        .send({
-          emailAdress: "j.doe@server.com",
-          //Password is missing
-        })
-        .end((err, res) => {
-          assert.ifError(err);
+describe("UC-101 Login", () => {
+  it("TC-101-1 When a required input is missing, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .auth(testToken, { type: "bearer" })
+      .send({
+        emailAdress: "j.doe@server.com",
+        //Password is missing
+      })
+      .end((err, res) => {
+        assert.ifError(err);
 
-          res.should.have.status(400);
-          res.should.be.an("object");
-          res.body.should.be
-            .an("object")
-            .that.has.all.keys("status", "message", "data");
+        res.should.have.status(400);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
 
-          let { status, message } = res.body;
-          status.should.be.a("number");
-          message.should.be.a("string").that.equals("Password is required");
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals("Password is required");
 
-          done();
-        });
-    });
+        done();
+      });
   });
   it("TC-101-2 When an invalid password is provided, a valid error should be returned", (done) => {
     chai
@@ -149,36 +147,122 @@ describe("UC-User", () => {
         done();
       });
   });
+});
 
-  describe("UC-102 register", () => {
-    it("TC-201-1 When a required input is missing, a valid error should be returned", (done) => {
-      chai
-        .request(server)
-        .post("/api/user")
-        .send({
-          firstName: "John",
-          //lastName is missing
-          emailAdress: "johndoe@server.com",
-          password: "secret",
-          street: "Mainstreet",
-          city: "New York",
-        })
-        .end((err, res) => {
-          assert.ifError(err);
+describe("UC-201 Register", () => {
+  it("TC-201-1 When a required input is missing, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .post("/api/user")
+      .send({
+        firstName: "John",
+        //lastName is missing
+        emailAdress: "johndoe@server.com",
+        password: "secret",
+        street: "Mainstreet",
+        city: "New York",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
 
-          res.should.have.status(400);
-          res.should.be.an("object");
-          res.body.should.be
-            .an("object")
-            .that.has.all.keys("status", "message", "data");
+        res.should.have.status(400);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
 
-          let { status, message } = res.body;
-          status.should.be.a("number");
-          message.should.be.a("string").that.equals("Missing last name");
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals("Missing last name");
 
-          done();
-        });
-    });
+        done();
+      });
+  });
+  it("TC-201-2 when an invalid email is provided, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .post("/api/user")
+      .send({
+        firstName: "John",
+        lastName: "Doe",
+        emailAdress: "johndoe", //Invalid email format
+        password: "secret",
+        street: "Mainstreet",
+        city: "New York",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(400);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals("Invalid email address");
+
+        done();
+      });
+  });
+  it("TC-201-3 When a password is provided shorter then 6 cahractes, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .post("/api/user")
+      .send({
+        firstName: "John",
+        lastName: "Doe",
+        emailAdress: "validEmail@server.com",
+        password: "12345", //Password is not a string
+        street: "Mainstreet",
+        city: "New York",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(400);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals("Password must be at least 6 characters long");
+
+        done();
+      });
+  });
+  it("TC-201-4 When a user already exists, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .post("/api/user")
+      .send({
+        firstName: "John",
+        lastName: "Doe",
+        emailAdress: "TEST1@avans.nl",
+        password: "secret",
+        street: "Mainstreet",
+        city: "New York",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(400);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals("User already exists");
+
+        done();
+      });
   });
   it("TC-201-5 When a user is created successfully a valid response should be returned", (done) => {
     chai
@@ -245,3 +329,8 @@ describe("UC-User", () => {
       });
   });
 });
+
+// describe("UC-202 Get all users", () => {
+//   it("TC-202-1 Show all users (at least 2)", (done) => {});
+//   it("TC-202-2 Show ");
+// });

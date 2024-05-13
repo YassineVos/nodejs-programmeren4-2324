@@ -24,22 +24,23 @@ let userController = {
     });
   },
 
+  // user.controller.js
   getAll: (req, res, next) => {
-    userService.getAll((error, success) => {
+    // Extract filters from query parameters
+    const filters = req.query;
+    userService.getAll(filters, (error, success) => {
       if (error) {
         return next({
-          status: error.status,
-          message: error.message,
+          status: error.status || 400,
+          message: error.message || "Invalid query parameters",
           data: {},
         });
       }
-      if (success) {
-        res.status(200).json({
-          status: 200,
-          message: success.message,
-          data: success.data,
-        });
-      }
+      res.status(200).json({
+        status: 200,
+        message: success.message,
+        data: success.data,
+      });
     });
   },
 

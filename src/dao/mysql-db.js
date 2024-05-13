@@ -38,8 +38,35 @@ const mysqlDb = {
   },
 
   // Retrieve all users
-  getAll(callback) {
-    pool.query("SELECT * FROM user", (err, results) => {
+  // mysql-db.js
+  getAll(filters, callback) {
+    let sql = "SELECT * FROM user";
+    const values = [];
+    const conditions = [];
+
+    if (filters) {
+      const validFields = [
+        "id",
+        "firstName",
+        "lastName",
+        "emailAddress",
+        "isActive",
+      ]; // Define valid fields
+      Object.keys(filters).forEach((field) => {
+        if (validFields.includes(field)) {
+          conditions.push(`${field} = ?`);
+          values.push(filters[field]);
+        } else {
+          return callback(new Error("Invalid field provided"), null);
+        }
+      });
+
+      if (conditions.length > 0) {
+        sql += " WHERE " + conditions.join(" AND ");
+      }
+    }
+
+    pool.query(sql, values, (err, results) => {
       if (err) {
         callback(err, null);
       } else {

@@ -521,3 +521,77 @@ describe("UC-202 Get all users", () => {
       });
   });
 });
+
+describe("UC-203 Get user profile", () => {
+  let testToken;
+  it("Login with test user to get valid token", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({
+        emailAdress: "j.doe@server.com", //Test user
+        password: "secret", //Test user
+      })
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        } else {
+          assert.ifError(err);
+          testToken = res.body.data.token;
+          done();
+        }
+      });
+  });
+
+  it("TC-203-1 Get user profile with invalid token", (done) => {
+    chai
+      .request(server)
+      .get("/api/user/1")
+      .set("Authorization", `Bearer invalidToken`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(401);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals("Token invalid!");
+
+        done();
+      });
+  });
+  it("TC-203-2 Get user profile with valid token", (done) => {
+    chai
+      .request(server)
+      .get("/api/user/1")
+      .set("Authorization", `Bearer ${testToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(200);
+        res.should.be.an("object");
+        res.body.should.be.an("object").that.has.all.keys("message", "data");
+
+        let { message, data } = res.body;
+        message.should.be
+          .a("string")
+          .that.equals(`Found user with id ${data.id}.`);
+
+        data.should.be
+          .an("object")
+          .that.includes.keys(
+            "id",
+            "firstName",
+            "lastName",
+            "emailAdress",
+            "isActive"
+          );
+
+        done();
+      });
+  });
+});

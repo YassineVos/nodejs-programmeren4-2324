@@ -13,8 +13,11 @@ const mysqlDb = {
     }
     const sql = `
         INSERT INTO user 
-        (firstName, lastName, emailAdress, password, phoneNumber, roles, street, city) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+
+
+        (firstName, lastName, emailAdress, password, phoneNumber, street, city) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+
     `;
     const values = [
       user.firstName,
@@ -22,7 +25,6 @@ const mysqlDb = {
       user.emailAdress,
       user.password,
       user.phoneNumber,
-      user.roles,
       user.street,
       user.city,
     ];
@@ -187,6 +189,77 @@ const mysqlDb = {
         return callback(err, null);
       }
       callback(null, connection);
+    });
+  },
+
+  // Meal functions -------------------------------------------------------------------------------
+  createMeal(meal, callback) {
+    const sql = `
+      INSERT INTO meal (name, description, isActive, isVega, isVegan, isToTakeHome, dateTime, maxAmountOfParticipants, price, imageUrl, cookId, allergenes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    const values = [
+      meal.name,
+      meal.description,
+      meal.isActive,
+      meal.isVega,
+      meal.isVegan,
+      meal.isToTakeHome,
+      meal.dateTime,
+      meal.maxAmountOfParticipants,
+      meal.price,
+      meal.imageUrl,
+      meal.cookId,
+      meal.allergenes,
+    ];
+    pool.query(sql, values, (err, result) => {
+      if (err) {
+        callback(err, null);
+      } else {
+        callback(null, { id: result.insertId, ...meal });
+      }
+    });
+  },
+
+  getAllMeals(callback) {
+    const sql = "SELECT * FROM meal";
+    pool.query(sql, (err, results) => {
+      if (err) {
+        callback(err, null);
+      } else {
+        callback(null, results);
+      }
+    });
+  },
+
+  getMealById(mealId, callback) {
+    const sql = "SELECT * FROM meal WHERE id = ?";
+    pool.query(sql, [mealId], (err, results) => {
+      if (err) {
+        callback(err, null);
+      } else {
+        callback(null, results[0]);
+      }
+    });
+  },
+
+  deleteMeal(mealId, callback) {
+    const sql = "DELETE FROM meal WHERE id = ?";
+    pool.query(sql, [mealId], (err, result) => {
+      if (err) {
+        callback(err, null);
+      } else {
+        if (result.affectedRows) {
+          callback(null, {
+            message: `Meal with ID ${mealId} deleted successfully`,
+          });
+        } else {
+          callback(
+            { status: 404, message: `Meal with ID ${mealId} not found` },
+            null
+          );
+        }
+      }
     });
   },
 };

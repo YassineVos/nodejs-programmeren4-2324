@@ -7,24 +7,36 @@ const logger = require("../util/logger");
 
 function validateLogin(req, res, next) {
   try {
-    if (!req.body.emailAdress || !req.body.password) {
-      throw new Error("email and password are required.");
+    // Check if email address is provided
+    if (!req.body.emailAdress) {
+      throw new Error("Email address is required");
     }
-    assert(typeof req.body.emailAdress === "string", "email must be a string.");
-    assert(typeof req.body.password === "string", "password must be a string.");
+    // Check if email address is a string
+    if (typeof req.body.emailAdress !== "string") {
+      throw new Error("Email must be a string");
+    }
+
+    // Check if password is provided
+    if (!req.body.password) {
+      throw new Error("Password is required");
+    }
+    // Check if password is a string
+    if (typeof req.body.password !== "string") {
+      throw new Error("Password must be a string");
+    }
+
+    // If all checks pass, move to the next middleware
     next();
   } catch (ex) {
     next({
-      status: 409,
-      message: ex.toString(),
+      status: 400, // Using HTTP 400 for bad request, as it's more appropriate for validation errors
+      message: ex.message,
       data: {},
     });
   }
 }
 
 function validateToken(req, res, next) {
-  logger.info("validateToken called");
-  logger.trace("Headers:", req.headers);
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     logger.warn("No token provided!");
@@ -46,7 +58,6 @@ function validateToken(req, res, next) {
         });
       }
       if (payload) {
-        logger.debug("token is valid", payload);
         req.userId = payload.userId;
         next();
       }

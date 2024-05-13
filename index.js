@@ -1,22 +1,37 @@
 require("dotenv").config();
+
 const express = require("express");
 const userRoutes = require("./src/routes/user.routes");
 const {
   routes: authRoutes,
   validateToken,
 } = require("./src/routes/authentication.routes");
+const mealRoutes = require("./src/routes/meal.routes");
 const app = express();
 
+// express.json zorgt dat we de body van een request kunnen lezen
 app.use(express.json());
 
 // Add authentication routes before other protected routes
 app.use("/api", authRoutes);
-
-// Add public user routes (e.g., create user)
+app.use("/api/meal", mealRoutes);
 app.use("/api", userRoutes);
 
-// Public info endpoint
+app.use(validateToken);
+
+const port = process.env.PORT || 3000;
+
+app.all("*", (req, res, next) => {
+  console.log("Request:", req.method, req.url);
+  next();
+});
+
+app.get("/", function (req, res) {
+  res.json({ message: "Hello World" });
+});
+
 app.get("/api/info", (req, res) => {
+  console.log("GET /api/info");
   const info = {
     studentName: "Yessin Boukrach",
     studentNumber: "2206857",
@@ -43,9 +58,9 @@ app.use((error, req, res, next) => {
   });
 });
 
-const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
+// Export for Chai to start the server
 module.exports = app;

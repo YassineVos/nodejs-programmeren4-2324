@@ -19,6 +19,12 @@ const validateUserCreateAssert = (req, res, next) => {
       "Invalid email address"
     );
 
+    // Validate password input to be at least 6 characters long
+    assert(
+      req.body.password.length >= 6,
+      "Password must be at least 6 characters long"
+    );
+
     next();
   } catch (ex) {
     return res.status(400).json({

@@ -15,6 +15,7 @@ const dbConfig = {
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_DATABASE || "share-a-meal",
+  multipleStatements: true,
 };
 
 logger.trace(dbConfig);

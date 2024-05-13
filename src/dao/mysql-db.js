@@ -54,14 +54,23 @@ const mysqlDb = {
         "emailAddress",
         "isActive",
       ]; // Define valid fields
-      Object.keys(filters).forEach((field) => {
-        if (validFields.includes(field)) {
-          conditions.push(`${field} = ?`);
-          values.push(filters[field]);
-        } else {
+
+      for (const field of Object.keys(filters)) {
+        if (!validFields.includes(field)) {
+          // This return effectively exits the function, preventing further execution
           return callback(new Error("Invalid field provided"), null);
         }
-      });
+
+        let value = filters[field];
+
+        // Check if the field is 'isActive' and translate true/false to 1/0
+        if (field === "isActive") {
+          value = value === "true" || value === true ? 1 : 0;
+        }
+
+        conditions.push(`${field} = ?`);
+        values.push(value);
+      }
 
       if (conditions.length > 0) {
         sql += " WHERE " + conditions.join(" AND ");
@@ -76,7 +85,6 @@ const mysqlDb = {
       }
     });
   },
-
   // Get a single user by ID
   getUserById(id, callback) {
     pool.query("SELECT * FROM user WHERE id = ?", [id], (err, results) => {

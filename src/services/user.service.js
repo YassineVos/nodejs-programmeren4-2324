@@ -33,7 +33,6 @@ const userService = {
       if (err) {
         callback(err, null);
       } else {
-        console.log(data);
         callback(null, {
           message: `Found ${data.length} users.`,
           data: data,

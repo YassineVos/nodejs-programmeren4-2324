@@ -330,7 +330,194 @@ describe("UC-201 Register", () => {
   });
 });
 
-// describe("UC-202 Get all users", () => {
-//   it("TC-202-1 Show all users (at least 2)", (done) => {});
-//   it("TC-202-2 Show ");
-// });
+describe("UC-202 Get all users", () => {
+  //login with test user to get valid token
+  let testToken;
+  it("Login with test user to get valid token", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({
+        emailAdress: "j.doe@server.com", //Test user
+        password: "secret", //Test user
+      })
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        } else {
+          assert.ifError(err);
+          testToken = res.body.data.token;
+          done();
+        }
+      });
+  });
+
+  it("TC-202-1 Show all users (at least 2)", (done) => {
+    chai
+      .request(server)
+      .get("/api/user")
+      .set("Authorization", `Bearer ${testToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+        res.should.have.status(200);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`Found ${data.length} users.`);
+
+        data.should.be.an("array").that.has.length.greaterThan(1);
+        data.forEach((user) => {
+          user.should.be
+            .an("object")
+            .that.includes.keys(
+              "id",
+              "firstName",
+              "lastName",
+              "emailAdress",
+              "isActive"
+            );
+        });
+
+        done();
+      });
+  });
+  it("TC-202-2 Show users on filter with non-existing field", (done) => {
+    chai
+      .request(server)
+      .get("/api/user?firstNAme=isduhkg&thirdname=doe")
+      .set("Authorization", `Bearer ${testToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(400);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals("Invalid field provided");
+
+        done();
+      });
+  });
+  it("TC-202-3 Show users using the filter 'isActive'=false", (done) => {
+    chai
+      .request(server)
+      .get("/api/user?isActive=false")
+      .set("Authorization", `Bearer ${testToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(200);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`Found ${data.length} users.`);
+
+        data.should.be.an("array");
+        data.forEach((user) => {
+          user.should.be
+            .an("object")
+            .that.includes.keys(
+              "id",
+              "firstName",
+              "lastName",
+              "emailAdress",
+              "isActive"
+            );
+          user.isActive.should.be.a("number").that.equals(0);
+        });
+
+        done();
+      });
+  });
+  it("TC-202-4 Show users using the filter 'isActive'=true", (done) => {
+    chai
+      .request(server)
+      .get("/api/user?isActive=true")
+      .set("Authorization", `Bearer ${testToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(200);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`Found ${data.length} users.`);
+
+        data.should.be.an("array");
+        data.forEach((user) => {
+          user.should.be
+            .an("object")
+            .that.includes.keys(
+              "id",
+              "firstName",
+              "lastName",
+              "emailAdress",
+              "isActive"
+            );
+          user.isActive.should.be.a("number").that.equals(1);
+        });
+
+        done();
+      });
+  });
+  it("TC-202-5 Show users using valid filters", (done) => {
+    chai
+      .request(server)
+      .get("/api/user?firstName=John&lastName=Doe")
+      .set("Authorization", `Bearer ${testToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(200);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`Found ${data.length} users.`);
+
+        data.should.be.an("array");
+        data.forEach((user) => {
+          user.should.be
+            .an("object")
+            .that.includes.keys(
+              "id",
+              "firstName",
+              "lastName",
+              "emailAdress",
+              "isActive"
+            );
+          user.firstName.should.be.a("string").that.equals("John");
+          user.lastName.should.be.a("string").that.equals("Doe");
+        });
+
+        done();
+      });
+  });
+});

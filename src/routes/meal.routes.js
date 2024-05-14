@@ -64,9 +64,9 @@ function validateMeal(req, res, next) {
 }
 
 // Routes
-router.post("/", validateToken, validateMeal, mealController.createMeal); // UC-301
-router.get("/", mealController.getAllMeals); // UC-303
-router.get("/:mealId", mealController.getMealById); // UC-304
-router.delete("/:mealId", validateToken, mealController.deleteMeal); // UC-305
+router.post("/meal", validateToken, validateMeal, mealController.createMeal); // UC-301
+router.get("/meal", mealController.getAllMeals); // UC-303
+router.get("/meal/:mealId", mealController.getMealById); // UC-304
+router.delete("/meal/:mealId", validateToken, mealController.deleteMeal); // UC-305
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const pool = require("../../mysql-pool-example");
+const logger = require("../util/logger");
 
 const mysqlDb = {
   // Add a new user
@@ -13,7 +14,10 @@ const mysqlDb = {
     }
     const sql = `
         INSERT INTO user 
-        (firstName, lastName, emailAdress, password, phoneNumber, roles, street, city) 
+
+        (firstName, lastName, emailAdress, password, phoneNumber, street, city, roles) 
+
+
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const values = [
@@ -22,9 +26,11 @@ const mysqlDb = {
       user.emailAdress,
       user.password,
       user.phoneNumber,
-      user.roles,
       user.street,
       user.city,
+
+      user.roles,
+
     ];
     pool.query(sql, values, (err, result) => {
       if (err) {
@@ -38,8 +44,43 @@ const mysqlDb = {
   },
 
   // Retrieve all users
-  getAll(callback) {
-    pool.query("SELECT * FROM user", (err, results) => {
+  getAll(filters, callback) {
+    let sql = "SELECT * FROM user";
+    const values = [];
+    const conditions = [];
+
+    if (filters) {
+      const validFields = [
+        "id",
+        "firstName",
+        "lastName",
+        "emailAddress",
+        "isActive",
+      ]; // Define valid fields
+
+      for (const field of Object.keys(filters)) {
+        if (!validFields.includes(field)) {
+          // This return effectively exits the function, preventing further execution
+          return callback(new Error("Invalid field provided"), null);
+        }
+
+        let value = filters[field];
+
+        // Check if the field is 'isActive' and translate true/false to 1/0
+        if (field === "isActive") {
+          value = value === "true" || value === true ? 1 : 0;
+        }
+
+        conditions.push(`${field} = ?`);
+        values.push(value);
+      }
+
+      if (conditions.length > 0) {
+        sql += " WHERE " + conditions.join(" AND ");
+      }
+    }
+
+    pool.query(sql, values, (err, results) => {
       if (err) {
         callback(err, null);
       } else {
@@ -53,6 +94,14 @@ const mysqlDb = {
     pool.query("SELECT * FROM user WHERE id = ?", [id], (err, results) => {
       if (err) {
         callback(err, null);
+      } else if (results.length === 0) {
+        callback(
+          {
+            status: 404,
+            message: `User with id ${id} not found.`,
+          },
+          null
+        );
       } else {
         callback(null, results[0]);
       }
@@ -61,33 +110,52 @@ const mysqlDb = {
 
   // Update a user's information
   updateUser(id, newData, callback) {
-    const sql = `
-        UPDATE user
-        SET firstName = ?, lastName = ?, emailAdress = ?, password = ?, phoneNumber = ?, roles = ?, street = ?, city = ?, isActive = ?
-        WHERE id = ?
-    `;
-    const values = [
-      newData.firstName,
-      newData.lastName,
-      newData.emailAdress,
-      newData.password,
-      newData.phoneNumber,
-      newData.roles,
-      newData.street,
-      newData.city,
-      newData.isActive,
-      id,
-    ];
-    pool.query(sql, values, (err, result) => {
+    // First, check if the user exists
+    this.getUserById(id, (err, user) => {
       if (err) {
-        callback(err, null);
-      } else {
-        if (result.affectedRows) {
-          callback(null, { id, ...newData });
-        } else {
-          callback({ message: `User with ID ${id} not found` }, null);
-        }
+        return callback(err, null);
       }
+
+      if (!user) {
+        // User does not exist
+        return callback(
+          { status: 404, message: `User with ID ${id} not found` },
+          null
+        );
+      }
+
+      // If user exists, continue with the update
+      const sql = `
+          UPDATE user
+          SET firstName = ?, lastName = ?, emailAdress = ?, password = ?, phoneNumber = ?, roles = ?, street = ?, city = ?, isActive = ?
+          WHERE id = ?
+      `;
+      const values = [
+        newData.firstName,
+        newData.lastName,
+        newData.emailAdress,
+        newData.password,
+        newData.phoneNumber,
+        newData.roles,
+        newData.street,
+        newData.city,
+        newData.isActive,
+        id,
+      ];
+      pool.query(sql, values, (err, result) => {
+        if (err) {
+          callback(err, null);
+        } else {
+          if (result.affectedRows) {
+            callback(null, { id, ...newData });
+          } else {
+            callback(
+              { status: 404, message: `User with ID ${id} not found` },
+              null
+            );
+          }
+        }
+      });
     });
   },
 
@@ -163,11 +231,12 @@ const mysqlDb = {
     });
   },
 
+  //
   // Meal functions -------------------------------------------------------------------------------
   createMeal(meal, callback) {
     const sql = `
-      INSERT INTO meal (name, description, isActive, isVega, isVegan, isToTakeHome, dateTime, maxAmountOfParticipants, price, imageUrl, cookId, allergenes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO meal (name, description, isActive, isVega, isVegan, isToTakeHome, dateTime, maxAmountOfParticipants, price, imageUrl,  allergenes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const values = [
       meal.name,
@@ -180,14 +249,17 @@ const mysqlDb = {
       meal.maxAmountOfParticipants,
       meal.price,
       meal.imageUrl,
-      meal.cookId,
       meal.allergenes,
+      meal.cookId,
     ];
     pool.query(sql, values, (err, result) => {
       if (err) {
         callback(err, null);
       } else {
-        callback(null, { id: result.insertId, ...meal });
+        callback(null, {
+          id: result.insertId,
+          ...meal,
+        });
       }
     });
   },
@@ -207,10 +279,13 @@ const mysqlDb = {
     const sql = "SELECT * FROM meal WHERE id = ?";
     pool.query(sql, [mealId], (err, results) => {
       if (err) {
-        callback(err, null);
-      } else {
-        callback(null, results[0]);
+        console.error("Error executing query:", err); // Log the error
+        return callback(err, null);
       }
+      if (results.length === 0) {
+        return callback(null, null); // No meal found
+      }
+      callback(null, results[0]); // Return the first meal found
     });
   },
 
@@ -235,4 +310,7 @@ const mysqlDb = {
   },
 };
 
+//
+
 module.exports = mysqlDb;
+//

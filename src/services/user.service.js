@@ -9,7 +9,7 @@ const userService = {
       }
       if (existingUser) {
         const error = new Error("User already exists");
-        error.status = 400; // Set a specific status code for this error
+        error.status = 403; // Set a specific status code for this error
         return callback(error); // Return this error with its status
       }
 
@@ -19,6 +19,7 @@ const userService = {
           return callback(err); // Ensure errors here are also properly handled
         }
         callback(null, {
+          status: 201,
           message: `User created with id ${data.id}.`,
           data: data,
         });
@@ -26,12 +27,12 @@ const userService = {
     });
   },
 
-  getAll: (callback) => {
-    database.getAll((err, data) => {
+  // user.service.js
+  getAll: (filters, callback) => {
+    database.getAll(filters, (err, data) => {
       if (err) {
         callback(err, null);
       } else {
-        console.log(data);
         callback(null, {
           message: `Found ${data.length} users.`,
           data: data,
@@ -57,7 +58,7 @@ const userService = {
   update: (id, updatedUser, callback) => {
     database.updateUser(id, updatedUser, (err, data) => {
       if (err) {
-        callback(err, null);
+        callback({ status: err.status || 500, message: err.message }, null);
       } else {
         if (data) {
           callback(null, {
@@ -65,33 +66,43 @@ const userService = {
             data: data,
           });
         } else {
-          callback(null, {
-            message: `User not found with id ${id}.`,
-            data: null,
-          });
+          callback(
+            {
+              status: 404,
+              message: `User not found with id ${id}.`,
+              data: null,
+            },
+            null
+          );
         }
       }
     });
   },
 
   // Add the delete method to the userService object
-  delete: (userId, callback) => {
-    database.deleteUser(userId, (err, data) => {
+  delete: (id, callback) => {
+    database.getUserById(id, (err, user) => {
       if (err) {
-        callback(err, null);
-      } else {
-        if (data) {
-          callback(null, {
-            message: `User deleted with id ${userId}.`,
-            data: data,
-          });
-        } else {
-          callback(null, {
-            message: `User not found with id ${userId}.`,
-            data: null,
-          });
-        }
+        return callback({ status: 500, message: err.message }, null);
       }
+
+      if (!user) {
+        return callback(
+          { status: 404, message: `User with ID ${id} not found` },
+          null
+        );
+      }
+
+      database.deleteUser(id, (err, data) => {
+        if (err) {
+          return callback({ status: 500, message: err.message }, null);
+        }
+
+        callback(null, {
+          message: `User with id ${id} deleted.`,
+          data: data,
+        });
+      });
     });
   },
 };

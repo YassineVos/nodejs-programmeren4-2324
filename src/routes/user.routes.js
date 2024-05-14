@@ -19,6 +19,18 @@ const validateUserCreateAssert = (req, res, next) => {
       "Invalid email address"
     );
 
+    // Validate phonenumber input to be 10 characters long
+    assert(
+      req.body.phoneNumber.length === 10,
+      "Phone number must be 10 characters long"
+    );
+
+    // Validate password input to be at least 6 characters long
+    assert(
+      req.body.password.length >= 6,
+      "Password must be at least 6 characters long"
+    );
+
     next();
   } catch (ex) {
     return res.status(400).json({
@@ -30,14 +42,14 @@ const validateUserCreateAssert = (req, res, next) => {
 };
 
 // Define user routes
+router.get("/user/getAll", validateToken, userController.getAll);
 router.post("/user", validateUserCreateAssert, userController.add);
-router.get("/user", validateToken, userController.getAll);
 router.get("/user/profile", validateToken, userController.getProfile);
 router.get("/user/:userId", validateToken, userController.getById);
 router.put(
   "/user/:userId",
-  validateToken,
   validateUserCreateAssert,
+  validateToken,
   userController.update
 );
 router.delete("/user/:userId", validateToken, userController.delete);

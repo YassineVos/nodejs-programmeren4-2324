@@ -1,4 +1,5 @@
 const mealService = require("../services/meal.service");
+const logger = require("../util/logger");
 
 const mealController = {
   createMeal: (req, res, next) => {
@@ -47,6 +48,15 @@ const mealController = {
           data: {},
         });
       }
+
+      if (!result) {
+        return next({
+          status: 404,
+          message: `Meal with ID ${mealId} not found`,
+          data: {},
+        });
+      }
+
       res.status(200).json({
         status: 200,
         message: `Meal with ID ${mealId} retrieved successfully`,
@@ -58,6 +68,7 @@ const mealController = {
   deleteMeal: (req, res, next) => {
     const mealId = parseInt(req.params.mealId, 10);
     const userId = req.userId; // Extract userId from token (provided by validateToken)
+    logger.info(`User ${userId} is trying to delete meal ${mealId}`);
 
     mealService.getMealById(mealId, (error, meal) => {
       if (error) {

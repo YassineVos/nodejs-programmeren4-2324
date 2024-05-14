@@ -9,8 +9,6 @@ const jwtSecretKey = require("../util/config").secretkey;
 
 const authController = {
   login: (userCredentials, callback) => {
-    logger.debug("login");
-
     db.getConnection((err, connection) => {
       if (err) {
         logger.error(err);
@@ -34,9 +32,6 @@ const authController = {
                 rows.length === 1 &&
                 rows[0].password == userCredentials.password
               ) {
-                logger.debug(
-                  "passwords DID match, sending userinfo and valid token"
-                );
                 // Extract the password from the userdata - we do not send that in the response.
                 const { password, ...userinfo } = rows[0];
                 // Create an object containing the data we want in the payload.
@@ -49,7 +44,6 @@ const authController = {
                   jwtSecretKey,
                   { expiresIn: "12d" },
                   (err, token) => {
-                    logger.info("User logged in, sending: ", userinfo);
                     callback(null, {
                       status: 200,
                       message: "User logged in",
@@ -58,10 +52,9 @@ const authController = {
                   }
                 );
               } else {
-                logger.debug("User not found or password invalid");
                 callback(
                   {
-                    status: 409,
+                    status: 404,
                     message: "User not found or password invalid",
                     data: {},
                   },

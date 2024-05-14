@@ -22,13 +22,13 @@ app.use(validateToken);
 
 const port = process.env.PORT || 3000;
 
+app.get("/", function (req, res) {
+  res.json({ message: "Hello World" });
+});
+
 app.all("*", (req, res, next) => {
   console.log("Request:", req.method, req.url);
   next();
-});
-
-app.get("/", function (req, res) {
-  res.json({ message: "Hello World" });
 });
 
 app.get("/api/info", (req, res) => {

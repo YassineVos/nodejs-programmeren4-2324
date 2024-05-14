@@ -1101,7 +1101,118 @@ describe("UC-206 Delete user", () => {
         done();
       });
   });
-  // it("TC-206-2 Delete user without logging verin", (done) => {});
-  // it("TC-206-3 Delete user that is not the same as the logged in user", (done) => {});
-  // it("TC-206-4 Delete user succesfully", (done) => {});
+
+  it("TC-206-2 Delete user without logging verin", (done) => {
+    chai
+      .request(server)
+      .delete("/api/user/41")
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(401);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals("No token provided!");
+
+        done();
+      });
+  });
+  it("TC-206-3 Delete user that is not the same as the logged in user", (done) => {
+    chai
+      .request(server)
+      .delete("/api/user/46")
+      .set("Authorization", `Bearer ${testDeleteToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(403);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals("You are not authorized to delete this user.");
+
+        done();
+      });
+  });
+  it("TC-206-4 Delete user succesfully", (done) => {
+    // first create a user to delete
+    chai
+      .request(server)
+      .post("/api/user")
+      .send({
+        firstName: "Delete",
+        lastName: "Test",
+        emailAdress: "deleteuser@avans.nl",
+        password: "secret",
+        phoneNumber: "1234567890",
+        street: "Mainstreet",
+        city: "New York",
+        roles: "user",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(201);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let deleteUserId = res.body.data.id;
+
+        // login with the user to get the token
+        chai
+          .request(server)
+          .post("/api/login")
+          .send({
+            emailAdress: "deleteuser@avans.nl",
+            password: "secret",
+          })
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              assert.ifError(err);
+              const deleteToken = res.body.data.token;
+
+              // delete the user
+              chai
+                .request(server)
+                .delete(`/api/user/${deleteUserId}`)
+                .set("Authorization", `Bearer ${deleteToken}`)
+                .end((err, res) => {
+                  assert.ifError(err);
+
+                  res.should.have.status(200);
+                  res.should.be.an("object");
+                  res.body.should.be
+                    .an("object")
+                    .that.has.all.keys("status", "message", "data");
+
+                  let { status, message, data } = res.body;
+                  status.should.be.a("number");
+                  message.should.be
+                    .a("string")
+                    .that.equals(`User with id ${deleteUserId} deleted.`);
+
+                  done();
+                });
+            }
+          });
+      });
+  });
 });
+
+
+//meal tests----------------------------------------------------------------------------------------------------------------

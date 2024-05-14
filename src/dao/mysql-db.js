@@ -1,4 +1,5 @@
 const pool = require("../../mysql-pool-example");
+const logger = require("../util/logger");
 
 const mysqlDb = {
   // Add a new user
@@ -243,8 +244,8 @@ const mysqlDb = {
       meal.maxAmountOfParticipants,
       meal.price,
       meal.imageUrl,
-      meal.cookId,
       meal.allergenes,
+      meal.cookId,
     ];
     pool.query(sql, values, (err, result) => {
       if (err) {
@@ -273,10 +274,13 @@ const mysqlDb = {
     const sql = "SELECT * FROM meal WHERE id = ?";
     pool.query(sql, [mealId], (err, results) => {
       if (err) {
-        callback(err, null);
-      } else {
-        callback(null, results[0]);
+        console.error("Error executing query:", err); // Log the error
+        return callback(err, null);
       }
+      if (results.length === 0) {
+        return callback(null, null); // No meal found
+      }
+      callback(null, results[0]); // Return the first meal found
     });
   },
 

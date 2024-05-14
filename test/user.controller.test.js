@@ -1465,6 +1465,191 @@ describe("UC-304 Get meal by id", () => {
       });
   });
 
-  // it("UC-304-1 Get meal by id without logging in", (done) => {});
-  // it("UC-304-2 Get meal by id with valid token", (done) => {});
+  it("UC-304-1 Get meal that doesn't exist", (done) => {
+    chai
+      .request(server)
+      .get("/api/meal/999999")
+      .set("Authorization", `Bearer ${testMealToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(404);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`Meal with ID 999999 not found`);
+        data.should.be.an("object").that.is.empty;
+
+        done();
+      });
+  });
+  it("UC-304-2 Get meal by id succesfully", (done) => {
+    chai
+      .request(server)
+      .get("/api/meal/46")
+      .set("Authorization", `Bearer ${testMealToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(200);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`Meal with ID 46 retrieved successfully`);
+        data.should.be.an("object").that.is.not.empty;
+
+        done();
+      });
+  });
+});
+
+describe("UC 305 Delete meal", () => {
+  let testMealId;
+  let testMealToken;
+  let testUserId;
+  it("Create meal for the tests", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({
+        emailAdress: "TEST1@avans.nl",
+        password: "secret",
+      })
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        } else {
+          assert.ifError(err);
+          testUserId = res.body.data.id;
+          testMealToken = res.body.data.token;
+
+          chai
+            .request(server)
+            .post("/api/meal")
+            .set("Authorization", `Bearer ${testMealToken}`)
+            .send({
+              name: "TestMeal",
+              cookId: 41,
+              description: "A description",
+              price: 10.0,
+              category: "Lunch",
+              isActive: true,
+              isVega: false,
+              isVegan: true,
+              isToTakeHome: false,
+              dateTime: "2021-06-01T12:00:00",
+              maxAmountOfParticipants: 10,
+              imageUrl: "https://www.google.com",
+              allergenes: "Gluten",
+            })
+            .end((err, res) => {
+              assert.ifError(err);
+
+              res.should.have.status(201);
+              res.should.be.an("object");
+              res.body.should.be
+                .an("object")
+                .that.has.all.keys("status", "message", "data");
+
+              testMealId = res.body.data.id;
+              done();
+            });
+        }
+      });
+  });
+  it("TC-305-1 Delete meal without logging in, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .delete(`/api/meal/${testMealId}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(401);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals("No token provided!");
+
+        done();
+      });
+  });
+  it("TC-305-2 Delete meal without being the owner of the meal, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({
+        emailAdress: "TEST2@avans.nl",
+        password: "secret",
+      })
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        } else {
+          assert.ifError(err);
+          const otherToken = res.body.data.token;
+
+          chai
+            .request(server)
+            .delete(`/api/meal/${testMealId}`)
+            .set("Authorization", `Bearer ${otherToken}`)
+            .end((err, res) => {
+              assert.ifError(err);
+
+              res.should.have.status(403);
+              res.should.be.an("object");
+              res.body.should.be
+                .an("object")
+                .that.has.all.keys("status", "message", "data");
+
+              let { status, message } = res.body;
+              status.should.be.a("number");
+              message.should.be
+                .a("string")
+                .that.equals("You are not authorized to delete this meal.");
+
+              done();
+            });
+        }
+      });
+  });
+  it("TC-305-3 Delete meal that doesn't exist, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .delete(`/api/meal/999999`)
+      .set("Authorization", `Bearer ${testMealToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(404);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`Meal with ID 999999 not found`);
+        data.should.be.an("object").that.is.empty;
+
+        done();
+      });
+  });
 });

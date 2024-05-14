@@ -227,6 +227,7 @@ const mysqlDb = {
     });
   },
 
+  //
   // Meal functions -------------------------------------------------------------------------------
   createMeal(meal, callback) {
     const sql = `

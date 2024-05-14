@@ -246,7 +246,7 @@ const mysqlDb = {
       meal.price,
       meal.imageUrl,
       meal.cookId,
-      JSON.stringify(meal.allergenes), // Ensure allergenes is stored correctly
+      meal.allergenes,
     ];
     pool.query(sql, values, (err, result) => {
       if (err) {
@@ -299,6 +299,8 @@ const mysqlDb = {
     });
   },
 };
+
+//
 
 module.exports = mysqlDb;
 //

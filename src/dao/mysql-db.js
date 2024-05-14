@@ -13,11 +13,8 @@ const mysqlDb = {
     }
     const sql = `
         INSERT INTO user 
-
-
         (firstName, lastName, emailAdress, password, phoneNumber, street, city, roles) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-
     `;
     const values = [
       user.firstName,
@@ -85,6 +82,7 @@ const mysqlDb = {
       }
     });
   },
+
   // Get a single user by ID
   getUserById(id, callback) {
     pool.query("SELECT * FROM user WHERE id = ?", [id], (err, results) => {

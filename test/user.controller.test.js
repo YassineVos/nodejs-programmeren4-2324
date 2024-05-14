@@ -396,7 +396,7 @@ describe("UC-202 Get all users", () => {
   it("TC-202-1 Show all users (at least 2)", (done) => {
     chai
       .request(server)
-      .get("/api/user")
+      .get("/api/user/getAll")
       .set("Authorization", `Bearer ${testToken}`)
       .end((err, res) => {
         assert.ifError(err);
@@ -431,7 +431,7 @@ describe("UC-202 Get all users", () => {
   it("TC-202-2 Show users on filter with non-existing field", (done) => {
     chai
       .request(server)
-      .get("/api/user?firstNAme=isduhkg&thirdname=doe")
+      .get("/api/user/getAll?firstNAme=isduhkg&thirdname=doe")
       .set("Authorization", `Bearer ${testToken}`)
       .end((err, res) => {
         assert.ifError(err);
@@ -452,7 +452,7 @@ describe("UC-202 Get all users", () => {
   it("TC-202-3 Show users using the filter 'isActive'=false", (done) => {
     chai
       .request(server)
-      .get("/api/user?isActive=false")
+      .get("/api/user/getAll?isActive=false")
       .set("Authorization", `Bearer ${testToken}`)
       .end((err, res) => {
         assert.ifError(err);
@@ -489,7 +489,7 @@ describe("UC-202 Get all users", () => {
   it("TC-202-4 Show users using the filter 'isActive'=true", (done) => {
     chai
       .request(server)
-      .get("/api/user?isActive=true")
+      .get("/api/user/getAll?isActive=true")
       .set("Authorization", `Bearer ${testToken}`)
       .end((err, res) => {
         assert.ifError(err);
@@ -526,7 +526,7 @@ describe("UC-202 Get all users", () => {
   it("TC-202-5 Show users using valid filters", (done) => {
     chai
       .request(server)
-      .get("/api/user?firstName=John&lastName=Doe")
+      .get("/api/user/getAll?firstName=John&lastName=Doe")
       .set("Authorization", `Bearer ${testToken}`)
       .end((err, res) => {
         assert.ifError(err);

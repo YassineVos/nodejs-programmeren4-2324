@@ -1,4 +1,5 @@
 require("dotenv").config();
+const logger = require("./src/util/logger");
 
 const express = require("express");
 const userRoutes = require("./src/routes/user.routes");

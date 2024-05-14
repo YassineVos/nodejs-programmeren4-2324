@@ -41,6 +41,7 @@ function validateMeal(req, res, next) {
     });
   }
 
+  //
   if (
     typeof name !== "string" ||
     typeof description !== "string" ||

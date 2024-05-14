@@ -37,7 +37,7 @@ describe("UC-101 Login", () => {
       .post("/api/login")
       .auth(testToken, { type: "bearer" })
       .send({
-        emailAdress: "j.doe@server.com",
+        emailAdress: "TEST1@avans.nl",
         //Password is missing
       })
       .end((err, res) => {
@@ -61,7 +61,7 @@ describe("UC-101 Login", () => {
       .request(server)
       .post("/api/login")
       .send({
-        emailAdress: "j.doe@server.com",
+        emailAdress: "TEST1@avans.nl",
         password: 12345, //Password is not a string
       })
       .end((err, res) => {
@@ -91,7 +91,7 @@ describe("UC-101 Login", () => {
       .end((err, res) => {
         assert.ifError(err);
 
-        res.should.have.status(401);
+        res.should.have.status(404);
         res.should.be.an("object");
         res.body.should.be
           .an("object")
@@ -214,6 +214,7 @@ describe("UC-201 Register", () => {
         firstName: "John",
         lastName: "Doe",
         emailAdress: "validEmail@server.com",
+        phoneNumber: "1234567890",
         password: "12345", //Password is not a string
         street: "Mainstreet",
         city: "New York",
@@ -237,31 +238,74 @@ describe("UC-201 Register", () => {
       });
   });
   it("TC-201-4 When a user already exists, a valid error should be returned", (done) => {
+    const testUser = {
+      firstName: "John",
+      lastName: "Doe",
+      emailAdress: "TESTFOREXISTING@avans.nl",
+      password: "secret",
+      phoneNumber: "1234567890",
+      street: "Mainstreet",
+      city: "New York",
+      roles: "user",
+    };
+
+    // Create the user for the first time
     chai
       .request(server)
       .post("/api/user")
-      .send({
-        firstName: "John",
-        lastName: "Doe",
-        emailAdress: "TEST1@avans.nl",
-        password: "secret",
-        street: "Mainstreet",
-        city: "New York",
-      })
+      .send(testUser)
       .end((err, res) => {
         assert.ifError(err);
 
-        res.should.have.status(400);
+        res.should.have.status(201);
         res.should.be.an("object");
         res.body.should.be
           .an("object")
           .that.has.all.keys("status", "message", "data");
 
-        let { status, message } = res.body;
-        status.should.be.a("number");
-        message.should.be.a("string").that.equals("User already exists");
+        // Try to create the same user again
+        chai
+          .request(server)
+          .post("/api/user")
+          .send(testUser)
+          .end((err, res) => {
+            assert.ifError(err);
 
-        done();
+            res.should.have.status(403);
+            res.should.be.an("object");
+            res.body.should.be
+              .an("object")
+              .that.has.all.keys("status", "message", "data");
+
+            let { status, message } = res.body;
+            status.should.be.a("number");
+            message.should.be.a("string").that.equals("User already exists");
+
+            // Delete the user after the test
+            chai
+              .request(server)
+              .post("/api/login")
+              .send({
+                emailAdress: testUser.emailAdress,
+                password: testUser.password,
+              })
+              .end((loginErr, loginRes) => {
+                if (loginErr) return done(loginErr);
+
+                loginRes.should.have.status(200);
+                const token = loginRes.body.data.token;
+
+                chai
+                  .request(server)
+                  .delete(`/api/user/${loginRes.body.data.id}`)
+                  .set("Authorization", `Bearer ${token}`)
+                  .end((deleteErr, deleteRes) => {
+                    if (deleteErr) return done(deleteErr);
+                    deleteRes.should.have.status(200);
+                    done();
+                  });
+              });
+          });
       });
   });
   it("TC-201-5 When a user is created successfully a valid response should be returned", (done) => {
@@ -273,14 +317,15 @@ describe("UC-201 Register", () => {
         lastName: "Doe",
         emailAdress: "voorbeeld@server.com",
         password: "secret",
-        phoneNumber: "123456789",
+        phoneNumber: "1234567890",
         street: "Mainstreet",
         city: "New York",
+        roles: "user",
       })
       .end((err, res) => {
         assert.ifError(err);
 
-        res.should.have.status(200);
+        res.should.have.status(201);
         res.should.be.an("object");
         res.body.should.be
           .an("object")
@@ -299,7 +344,8 @@ describe("UC-201 Register", () => {
             "lastName",
             "emailAdress",
             "street",
-            "city"
+            "city",
+            "roles"
           );
 
         chai
@@ -338,7 +384,7 @@ describe("UC-202 Get all users", () => {
       .request(server)
       .post("/api/login")
       .send({
-        emailAdress: "j.doe@server.com", //Test user
+        emailAdress: "TEST1@avans.nl", //Test user
         password: "secret", //Test user
       })
       .end((err, res) => {
@@ -529,7 +575,7 @@ describe("UC-203 Get user profile", () => {
       .request(server)
       .post("/api/login")
       .send({
-        emailAdress: "j.doe@server.com", //Test user
+        emailAdress: "TEST1@avans.nl", //Test user
         password: "secret", //Test user
       })
       .end((err, res) => {
@@ -546,7 +592,7 @@ describe("UC-203 Get user profile", () => {
   it("TC-203-1 Get user profile with invalid token", (done) => {
     chai
       .request(server)
-      .get("/api/user/1")
+      .get("/api/user/41")
       .set("Authorization", `Bearer invalidToken`)
       .end((err, res) => {
         assert.ifError(err);
@@ -567,7 +613,7 @@ describe("UC-203 Get user profile", () => {
   it("TC-203-2 Get user profile with valid token", (done) => {
     chai
       .request(server)
-      .get("/api/user/1")
+      .get("/api/user/41")
       .set("Authorization", `Bearer ${testToken}`)
       .end((err, res) => {
         assert.ifError(err);
@@ -595,3 +641,444 @@ describe("UC-203 Get user profile", () => {
       });
   });
 });
+
+describe("UC-204 Get user by id", () => {
+  let testToken;
+  it("Login with test user to get valid token", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({
+        emailAdress: "TEST1@avans.nl", //Test user
+        password: "secret",
+      })
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        } else {
+          assert.ifError(err);
+          testToken = res.body.data.token;
+          done();
+        }
+      });
+  });
+
+  it("TC-204-1 Get user by id with invalid token", (done) => {
+    chai
+      .request(server)
+      .get("/api/user/1")
+      .set("Authorization", `Bearer invalidToken`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(401);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals("Token invalid!");
+
+        done();
+      });
+  });
+  it("TC-204-2 Get user with id that doesn't exist", (done) => {
+    chai
+      .request(server)
+      .get("/api/user/999999")
+      .set("Authorization", `Bearer ${testToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(404);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("data", "message", "status");
+
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`User with id 999999 not found.`);
+        data.should.be.an("object").that.is.empty;
+
+        done();
+      });
+  });
+  it("TC-204-3 Get user with id that exists", (done) => {
+    chai
+      .request(server)
+      .get("/api/user/41")
+      .set("Authorization", `Bearer ${testToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(200);
+        res.should.be.an("object");
+        res.body.should.be.an("object").that.has.all.keys("message", "data");
+
+        let { message, data } = res.body;
+        message.should.be.a("string").that.equals(`Found user with id 41.`);
+        data.should.be
+          .an("object")
+          .that.includes.keys(
+            "id",
+            "firstName",
+            "lastName",
+            "emailAdress",
+            "isActive",
+            "roles",
+            "street",
+            "city"
+          );
+
+        done();
+      });
+  });
+});
+
+describe("UC-205 Update user", () => {
+  let userId;
+  let updateTestToken;
+  it("Create update test user and login for the tests", (done) => {
+    chai
+      .request(server)
+      .post("/api/user")
+      .send({
+        firstName: "Update",
+        lastName: "Test",
+        emailAdress: "updatetest@server.com",
+        password: "secret",
+        phoneNumber: "1234567890",
+        street: "Mainstreet",
+        city: "New York",
+        roles: "user",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(201);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        userId = res.body.data.id;
+
+        chai
+          .request(server)
+          .post("/api/login")
+          .send({
+            emailAdress: "updatetest@server.com",
+            password: "secret",
+          })
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              assert.ifError(err);
+              updateTestToken = res.body.data.token;
+              done();
+            }
+          });
+      });
+  });
+  it("TC-205-1 Update user with missing valid field (emaiAdress)", (done) => {
+    chai
+      .request(server)
+      .put(`/api/user/${userId}`)
+      .set("Authorization", `Bearer ${testToken}`)
+      .send({
+        firstName: "Update",
+        lastName: "Test",
+        //emailAdress is missing
+        password: "secret",
+        phoneNumber: "1234567890",
+        street: "Mainstreet",
+        city: "New York",
+        roles: "user",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(400);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals("Missing email");
+
+        done();
+      });
+  });
+  it("TC-205-2 Update user with other user, a valid error should be returned", (done) => {
+    // first we need to create another user
+    chai
+      .request(server)
+      .post("/api/user")
+      .send({
+        firstName: "Other",
+        lastName: "User",
+        emailAdress: "otheruser@service.com",
+        password: "secret",
+        phoneNumber: "1234567890",
+        street: "Mainstreet",
+        city: "New York",
+        roles: "user",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(201);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let otherUserId = res.body.data.id;
+
+        chai
+          .request(server)
+          .put(`/api/user/${userId}`)
+          .set("Authorization", `Bearer ${testToken}`)
+          .send({
+            firstName: "NewNameShoudlNotBeUpdated",
+            lastName: "NewNameShoudlNotBeUpdated",
+            emailAdress: "updatetest@server.com",
+            password: "secret",
+            phoneNumber: "1234567890",
+            street: "Mainstreet",
+            city: "New York",
+            roles: "user",
+          })
+          .end((err, res) => {
+            assert.ifError(err);
+
+            res.should.have.status(401);
+            res.should.be.an("object");
+            res.body.should.be
+              .an("object")
+              .that.has.all.keys("status", "message", "data");
+
+            let { status, message } = res.body;
+            status.should.be.a("number");
+            message.should.be.a("string").that.equals("Token invalid!");
+
+            // Delete the other user after the test
+            chai
+              .request(server)
+              .post("/api/login")
+              .send({
+                emailAdress: "otheruser@service.com",
+                password: "secret",
+              })
+              .end((loginErr, loginRes) => {
+                if (loginErr) return done(loginErr);
+
+                loginRes.should.have.status(200);
+                const token = loginRes.body.data.token;
+
+                chai
+                  .request(server)
+                  .delete(`/api/user/${otherUserId}`)
+                  .set("Authorization", `Bearer ${token}`)
+                  .end((deleteErr, deleteRes) => {
+                    if (deleteErr) return done(deleteErr);
+                    deleteRes.should.have.status(200);
+                    done();
+                  });
+              });
+          });
+      });
+  });
+  it("TC-205-3 Update user with invalid phoneNumber, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .put(`/api/user/${userId}`)
+      .set("Authorization", `Bearer ${testToken}`)
+      .send({
+        firstName: "Update",
+        lastName: "Test",
+        emailAdress: "updatetest@server.com",
+        password: "secret",
+        phoneNumber: "123456789", // phone number withh only 9 digits
+        street: "Mainstreet",
+        city: "New York",
+        roles: "user",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(400);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals("Phone number must be 10 characters long");
+
+        done();
+      });
+  });
+  it("TC-205-4 Update non existing user, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .put(`/api/user/{userId}`)
+      .set("Authorization", `Bearer ${updateTestToken}`)
+      .send({
+        firstName: "Update",
+        lastName: "Test",
+        emailAdress: "nonexistinguser@server.com",
+        password: "secret",
+        phoneNumber: "1234567890",
+        street: "Mainstreet",
+        city: "New York",
+        roles: "user",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(403);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`You are not authorized to update this user.`);
+
+        done();
+      });
+  });
+  it("TC-205-5 Update user without logging in, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .put(`/api/user/{userId}`)
+      .send({
+        firstName: "Update",
+        lastName: "Test",
+        emailAdress: "updatetest@server.com",
+        password: "secret",
+        phoneNumber: "1234567890",
+        street: "Mainstreet",
+        city: "New York",
+        roles: "user",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(401);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals("No token provided!");
+
+        done();
+      });
+  });
+  it("TC-205-6 Update user succesfully", (done) => {
+    chai
+      .request(server)
+      .put(`/api/user/${userId}`)
+      .set("Authorization", `Bearer ${updateTestToken}`)
+      .send({
+        firstName: "Updated",
+        lastName: "Test",
+        emailAdress: "updatetest@server.com",
+        password: "secret",
+        phoneNumber: "1234567890",
+        street: "Mainstreet",
+        city: "New York",
+        roles: "user",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(200);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`User updated with id ${data.id}.`);
+
+        data.should.be
+          .an("object")
+          .that.includes.keys(
+            "id",
+            "firstName",
+            "lastName",
+            "emailAdress",
+            "password",
+            "phoneNumber",
+            "roles",
+            "street",
+            "city"
+          );
+
+        done();
+      });
+  });
+  it("Delete the test user after the tests", (done) => {
+    chai
+      .request(server)
+      .delete(`/api/user/${userId}`)
+      .set("Authorization", `Bearer ${updateTestToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+        res.should.have.status(200);
+        done();
+      });
+  });
+});
+
+// describe("UC-206 Delete user", () => {
+//   it("TC-206-1 Delete non-exisiting user, a valid error should be returned", (done) => {
+//     chai
+//       .request(server)
+//       .delete("/api/user/999999")
+//       .set("Authorization", `Bearer ${testToken}`)
+//       .end((err, res) => {
+//         assert.ifError(err);
+
+//         res.should.have.status(404);
+//         res.should.be.an("object");
+//         res.body.should.be
+//           .an("object")
+//           .that.has.all.keys("status", "message", "data");
+
+//         let { status, message, data } = res.body;
+//         status.should.be.a("number");
+//         message.should.be
+//           .a("string")
+//           .that.equals(`User with ID 999999 not found`);
+//         data.should.be.an("object").that.is.empty;
+
+//         done();
+//       });
+//   });
+//   it("TC-206-2 Delete user without logging in", (done) => {});
+//   it("TC-206-3 Delete user that is not the same as the logged in user", (done) => {});
+//   it("TC-206-4 Delete user succesfully", (done) => {});
+// });

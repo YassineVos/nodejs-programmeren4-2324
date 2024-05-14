@@ -54,7 +54,7 @@ const authController = {
               } else {
                 callback(
                   {
-                    status: 401,
+                    status: 404,
                     message: "User not found or password invalid",
                     data: {},
                   },

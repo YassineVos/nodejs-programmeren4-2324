@@ -15,8 +15,8 @@ const mysqlDb = {
         INSERT INTO user 
 
 
-        (firstName, lastName, emailAdress, password, phoneNumber, street, city) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        (firstName, lastName, emailAdress, password, phoneNumber, street, city, roles) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 
     `;
     const values = [
@@ -27,6 +27,7 @@ const mysqlDb = {
       user.phoneNumber,
       user.street,
       user.city,
+      user.roles,
     ];
     pool.query(sql, values, (err, result) => {
       if (err) {
@@ -40,7 +41,6 @@ const mysqlDb = {
   },
 
   // Retrieve all users
-  // mysql-db.js
   getAll(filters, callback) {
     let sql = "SELECT * FROM user";
     const values = [];
@@ -90,6 +90,14 @@ const mysqlDb = {
     pool.query("SELECT * FROM user WHERE id = ?", [id], (err, results) => {
       if (err) {
         callback(err, null);
+      } else if (results.length === 0) {
+        callback(
+          {
+            status: 404,
+            message: `User with id ${id} not found.`,
+          },
+          null
+        );
       } else {
         callback(null, results[0]);
       }
@@ -98,6 +106,14 @@ const mysqlDb = {
 
   // Update a user's information
   updateUser(id, newData, callback) {
+    // first check if the user exists
+    this.getUserById(id, (err, user) => {
+      if (err) {
+        return callback(err, null);
+      }
+      // if user existsm, continute with the update
+    });
+
     const sql = `
         UPDATE user
         SET firstName = ?, lastName = ?, emailAdress = ?, password = ?, phoneNumber = ?, roles = ?, street = ?, city = ?, isActive = ?

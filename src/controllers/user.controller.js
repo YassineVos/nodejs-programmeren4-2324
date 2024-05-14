@@ -15,7 +15,7 @@ let userController = {
         });
       }
       if (success) {
-        res.status(200).json({
+        res.status(201).json({
           status: success.status,
           message: success.message,
           data: success.data,
@@ -49,8 +49,8 @@ let userController = {
     userService.getById(userId, (error, success) => {
       if (error) {
         return next({
-          status: error.status,
-          message: error.message,
+          status: error.status || 500,
+          message: error.message || "An error occurred.",
           data: {},
         });
       }
@@ -63,6 +63,7 @@ let userController = {
       }
     });
   },
+
   update: (req, res, next) => {
     const userId = parseInt(req.params.userId, 10);
     const loggedInUserId = req.userId; // Get the logged-in user's ID from the request
@@ -132,7 +133,6 @@ let userController = {
     userService.getById(userId, (error, success) => {
       if (error) {
         return next({
-          status: error.status || 500,
           message: error.message,
           data: {},
         });

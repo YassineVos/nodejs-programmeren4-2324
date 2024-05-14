@@ -80,23 +80,29 @@ const userService = {
   },
 
   // Add the delete method to the userService object
-  delete: (userId, callback) => {
-    database.deleteUser(userId, (err, data) => {
+  delete: (id, callback) => {
+    database.getUserById(id, (err, user) => {
       if (err) {
-        callback(err, null);
-      } else {
-        if (data) {
-          callback(null, {
-            message: `User deleted with id ${userId}.`,
-            data: data,
-          });
-        } else {
-          callback(null, {
-            message: `User not found with id ${userId}.`,
-            data: null,
-          });
-        }
+        return callback({ status: 500, message: err.message }, null);
       }
+
+      if (!user) {
+        return callback(
+          { status: 404, message: `User with ID ${id} not found` },
+          null
+        );
+      }
+
+      database.deleteUser(id, (err, data) => {
+        if (err) {
+          return callback({ status: 500, message: err.message }, null);
+        }
+
+        callback(null, {
+          message: `User with id ${id} deleted.`,
+          data: data,
+        });
+      });
     });
   },
 };

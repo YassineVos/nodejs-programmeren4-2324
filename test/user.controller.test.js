@@ -1056,32 +1056,52 @@ describe("UC-205 Update user", () => {
   });
 });
 
-// describe("UC-206 Delete user", () => {
-//   it("TC-206-1 Delete non-exisiting user, a valid error should be returned", (done) => {
-//     chai
-//       .request(server)
-//       .delete("/api/user/999999")
-//       .set("Authorization", `Bearer ${testToken}`)
-//       .end((err, res) => {
-//         assert.ifError(err);
+describe("UC-206 Delete user", () => {
+  let testDeleteToken;
+  it("Login with test user to get valid token", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({
+        emailAdress: "TEST1@avans.nl", //Test user
+        password: "secret",
+      })
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        } else {
+          assert.ifError(err);
+          testDeleteToken = res.body.data.token;
+          done();
+        }
+      });
+  });
 
-//         res.should.have.status(404);
-//         res.should.be.an("object");
-//         res.body.should.be
-//           .an("object")
-//           .that.has.all.keys("status", "message", "data");
+  it("TC-206-1 Delete non-exisiting user, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .delete("/api/user/999999")
+      .set("Authorization", `Bearer ${testDeleteToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
 
-//         let { status, message, data } = res.body;
-//         status.should.be.a("number");
-//         message.should.be
-//           .a("string")
-//           .that.equals(`User with ID 999999 not found`);
-//         data.should.be.an("object").that.is.empty;
+        res.should.have.status(404);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
 
-//         done();
-//       });
-//   });
-  // it("TC-206-2 Delete user without logging in", (done) => {});
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`User with id 999999 not found.`);
+        data.should.be.an("object").that.is.empty;
+
+        done();
+      });
+  });
+  // it("TC-206-2 Delete user without logging verin", (done) => {});
   // it("TC-206-3 Delete user that is not the same as the logged in user", (done) => {});
   // it("TC-206-4 Delete user succesfully", (done) => {});
 });

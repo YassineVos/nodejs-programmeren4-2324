@@ -20,7 +20,7 @@ app.use(validateToken);
 app.use("/api/meal", mealRoutes);
 app.use("/api", userRoutes);
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 1137;
 
 app.all("*", (req, res, next) => {
   console.log("Request:", req.method, req.url);

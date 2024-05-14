@@ -24,7 +24,7 @@ function validateLogin(req, res, next) {
     if (typeof req.body.password !== "string") {
       throw new Error("Password must be a string");
     }
-
+    //
     // If all checks pass, move to the next middleware
     next();
   } catch (ex) {

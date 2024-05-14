@@ -119,4 +119,5 @@ jobs:
         with:
           app-name: "yessin-app"
           slot-name: "Production"
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
           package: .

@@ -68,31 +68,50 @@ let userController = {
     const userId = parseInt(req.params.userId, 10);
     const loggedInUserId = req.userId; // Get the logged-in user's ID from the request
 
-    // Check if the user trying to update is the same as the user being updated
-    if (userId !== loggedInUserId) {
-      return next({
-        status: 403, // Forbidden
-        message: "You are not authorized to update this user.",
-        data: {},
-      });
-    }
-
-    const updatedUser = req.body;
-    userService.update(userId, updatedUser, (error, success) => {
-      if (error) {
+    // Check if the user exists
+    userService.getById(userId, (err, user) => {
+      if (err) {
         return next({
-          status: error.status || 500,
-          message: error.message || "Internal Server Error",
+          status: err.status || 500,
+          message: err.message || "Internal Server Error",
           data: {},
         });
       }
-      if (success) {
-        res.status(200).json({
-          status: 200,
-          message: success.message,
-          data: success.data,
+
+      if (!user) {
+        return next({
+          status: 404,
+          message: `User with ID ${userId} not found`,
+          data: {},
         });
       }
+
+      // Check if the user trying to update is the same as the user being updated
+      if (userId !== loggedInUserId) {
+        return next({
+          status: 403, // Forbidden
+          message: "You are not authorized to update this user.",
+          data: {},
+        });
+      }
+
+      const updatedUser = req.body;
+      userService.update(userId, updatedUser, (error, success) => {
+        if (error) {
+          return next({
+            status: error.status || 500,
+            message: error.message || "Internal Server Error",
+            data: {},
+          });
+        }
+        if (success) {
+          res.status(200).json({
+            status: 200,
+            message: success.message,
+            data: success.data,
+          });
+        }
+      });
     });
   },
 

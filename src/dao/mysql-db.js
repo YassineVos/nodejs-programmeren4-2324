@@ -106,41 +106,52 @@ const mysqlDb = {
 
   // Update a user's information
   updateUser(id, newData, callback) {
-    // first check if the user exists
+    // First, check if the user exists
     this.getUserById(id, (err, user) => {
       if (err) {
         return callback(err, null);
       }
-      // if user existsm, continute with the update
-    });
 
-    const sql = `
-        UPDATE user
-        SET firstName = ?, lastName = ?, emailAdress = ?, password = ?, phoneNumber = ?, roles = ?, street = ?, city = ?, isActive = ?
-        WHERE id = ?
-    `;
-    const values = [
-      newData.firstName,
-      newData.lastName,
-      newData.emailAdress,
-      newData.password,
-      newData.phoneNumber,
-      newData.roles,
-      newData.street,
-      newData.city,
-      newData.isActive,
-      id,
-    ];
-    pool.query(sql, values, (err, result) => {
-      if (err) {
-        callback(err, null);
-      } else {
-        if (result.affectedRows) {
-          callback(null, { id, ...newData });
-        } else {
-          callback({ message: `User with ID ${id} not found` }, null);
-        }
+      if (!user) {
+        // User does not exist
+        return callback(
+          { status: 404, message: `User with ID ${id} not found` },
+          null
+        );
       }
+
+      // If user exists, continue with the update
+      const sql = `
+          UPDATE user
+          SET firstName = ?, lastName = ?, emailAdress = ?, password = ?, phoneNumber = ?, roles = ?, street = ?, city = ?, isActive = ?
+          WHERE id = ?
+      `;
+      const values = [
+        newData.firstName,
+        newData.lastName,
+        newData.emailAdress,
+        newData.password,
+        newData.phoneNumber,
+        newData.roles,
+        newData.street,
+        newData.city,
+        newData.isActive,
+        id,
+      ];
+      pool.query(sql, values, (err, result) => {
+        if (err) {
+          callback(err, null);
+        } else {
+          if (result.affectedRows) {
+            callback(null, { id, ...newData });
+          } else {
+            callback(
+              { status: 404, message: `User with ID ${id} not found` },
+              null
+            );
+          }
+        }
+      });
     });
   },
 

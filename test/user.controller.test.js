@@ -9,6 +9,7 @@ const saltRounds = 10;
 const assert = require("assert");
 const jwt = require("jsonwebtoken");
 const { jwtSecretKey, logger } = require("../src/util/logger");
+const { update } = require("../src/services/user.service");
 
 const testToken = process.env.JWT_TEST_TOKEN;
 // let testToken = 0;
@@ -845,8 +846,8 @@ describe("UC-205 Update user", () => {
 
         chai
           .request(server)
-          .put(`/api/user/${userId}`)
-          .set("Authorization", `Bearer ${testToken}`)
+          .put(`/api/user/${otherUserId}`)
+          .set("Authorization", `Bearer ${updateTestToken}`)
           .send({
             firstName: "NewNameShoudlNotBeUpdated",
             lastName: "NewNameShoudlNotBeUpdated",
@@ -860,7 +861,7 @@ describe("UC-205 Update user", () => {
           .end((err, res) => {
             assert.ifError(err);
 
-            res.should.have.status(401);
+            res.should.have.status(403);
             res.should.be.an("object");
             res.body.should.be
               .an("object")
@@ -868,7 +869,9 @@ describe("UC-205 Update user", () => {
 
             let { status, message } = res.body;
             status.should.be.a("number");
-            message.should.be.a("string").that.equals("Token invalid!");
+            message.should.be
+              .a("string")
+              .that.equals("You are not authorized to update this user.");
 
             // Delete the other user after the test
             chai
@@ -933,7 +936,7 @@ describe("UC-205 Update user", () => {
   it("TC-205-4 Update non existing user, a valid error should be returned", (done) => {
     chai
       .request(server)
-      .put(`/api/user/{userId}`)
+      .put(`/api/user/999999`)
       .set("Authorization", `Bearer ${updateTestToken}`)
       .send({
         firstName: "Update",
@@ -948,7 +951,7 @@ describe("UC-205 Update user", () => {
       .end((err, res) => {
         assert.ifError(err);
 
-        res.should.have.status(403);
+        res.should.have.status(404);
         res.should.be.an("object");
         res.body.should.be
           .an("object")
@@ -958,7 +961,7 @@ describe("UC-205 Update user", () => {
         status.should.be.a("number");
         message.should.be
           .a("string")
-          .that.equals(`You are not authorized to update this user.`);
+          .that.equals(`User with id 999999 not found.`);
 
         done();
       });
@@ -1078,7 +1081,7 @@ describe("UC-205 Update user", () => {
 //         done();
 //       });
 //   });
-//   it("TC-206-2 Delete user without logging in", (done) => {});
-//   it("TC-206-3 Delete user that is not the same as the logged in user", (done) => {});
-//   it("TC-206-4 Delete user succesfully", (done) => {});
-// });
+  // it("TC-206-2 Delete user without logging in", (done) => {});
+  // it("TC-206-3 Delete user that is not the same as the logged in user", (done) => {});
+  // it("TC-206-4 Delete user succesfully", (done) => {});
+});

@@ -14,7 +14,7 @@ app.use(express.json());
 
 // Add authentication routes before other protected routes
 app.use("/api", authRoutes);
-app.use("/api/meal", mealRoutes);
+app.use("/api", mealRoutes);
 app.use("/api", userRoutes);
 
 app.use(validateToken);

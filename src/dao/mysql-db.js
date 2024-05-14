@@ -229,8 +229,8 @@ const mysqlDb = {
   // Meal functions -------------------------------------------------------------------------------
   createMeal(meal, callback) {
     const sql = `
-      INSERT INTO meal (name, description, isActive, isVega, isVegan, isToTakeHome, dateTime, maxAmountOfParticipants, price, imageUrl, cookId, allergenes)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO meal (name, description, isActive, isVega, isVegan, isToTakeHome, dateTime, maxAmountOfParticipants, price, imageUrl,  allergenes)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const values = [
       meal.name,
@@ -250,7 +250,10 @@ const mysqlDb = {
       if (err) {
         callback(err, null);
       } else {
-        callback(null, { id: result.insertId, ...meal });
+        callback(null, {
+          id: result.insertId,
+          ...meal,
+        });
       }
     });
   },

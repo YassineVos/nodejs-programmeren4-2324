@@ -1208,170 +1208,263 @@ describe("UC-206 Delete user", () => {
   });
 });
 
-// meal tests ------------------
+// meal tests --------------------------------------------------------------
 
-// describe("UC-301 Create meal", () => {
-//   let testMealId;
-//   let testMealToken;
+describe("UC-301 Create meal", () => {
+  let testMealId;
+  let testMealToken;
 
-//   it("Create user for the tests", (done) => {
-//     chai
-//       .request(server)
-//       .post("/api/user")
-//       .send({
-//         firstName: "Meal",
-//         lastName: "Test",
-//         emailAdress: "mealtester@avans.nl",
-//         password: "secret",
-//         phoneNumber: "1234567890",
-//         street: "Mainstreet",
-//         city: "New York",
-//         roles: "user",
-//       })
-//       .end((err, res) => {
-//         assert.ifError(err);
+  it("Create user for the tests", (done) => {
+    chai
+      .request(server)
+      .post("/api/user")
+      .send({
+        firstName: "Meal",
+        lastName: "Test",
+        emailAdress: "mealtester@avans.nl",
+        password: "secret",
+        phoneNumber: "1234567890",
+        street: "Mainstreet",
+        city: "New York",
+        roles: "user",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
 
-//         res.should.have.status(201);
-//         res.should.be.an("object");
-//         res.body.should.be
-//           .an("object")
-//           .that.has.all.keys("status", "message", "data");
+        res.should.have.status(201);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
 
-//         chai
-//           .request(server)
-//           .post("/api/login")
-//           .send({
-//             emailAdress: "mealtester@avans.nl",
-//             password: "secret",
-//           })
-//           .end((err, res) => {
-//             if (err) {
-//               done(err);
-//             } else {
-//               assert.ifError(err);
-//               testMealToken = res.body.data.token;
-//               testMealId = res.body.data.id;
-//               done();
-//             }
-//           });
-//       });
-//   });
+        chai
+          .request(server)
+          .post("/api/login")
+          .send({
+            emailAdress: "mealtester@avans.nl",
+            password: "secret",
+          })
+          .end((err, res) => {
+            if (err) {
+              done(err);
+            } else {
+              assert.ifError(err);
+              testMealToken = res.body.data.token;
+              testMealId = res.body.data.id;
+              done();
+            }
+          });
+      });
+  });
 
-//   it("TC-301-1 Create meal with missing required field (name)", (done) => {
-//     chai
-//       .request(server)
-//       .post("/api/meal")
-//       .set("Authorization", `Bearer ${testMealToken}`)
-//       .send({
-//         //name is missing
-//         description: "A description",
-//         price: 10.0,
-//         category: "Lunch",
-//         isActive: 1,
-//       })
-//       .end((err, res) => {
-//         assert.ifError(err);
+  it("TC-301-1 Create meal with missing required field (name)", (done) => {
+    chai
+      .request(server)
+      .post("/api/meal")
+      .set("Authorization", `Bearer ${testMealToken}`)
+      .send({
+        //name is missing
+        description: "A description",
+        price: 10.0,
+        category: "Lunch",
+        isActive: 1,
+      })
+      .end((err, res) => {
+        assert.ifError(err);
 
-//         res.should.have.status(400);
-//         res.should.be.an("object");
-//         res.body.should.be
-//           .an("object")
-//           .that.has.all.keys("status", "message", "data");
+        res.should.have.status(400);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
 
-//         let { status, message } = res.body;
-//         status.should.be.a("number");
-//         message.should.be
-//           .a("string")
-//           .that.equals(
-//             "Missing required fields: name, description, isActive, isVega, isVegan, isToTakeHome, dateTime, maxAmountOfParticipants, price, imageUrl, or allergenes"
-//           );
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(
+            "Missing required fields: name, description, isActive, isVega, isVegan, isToTakeHome, dateTime, maxAmountOfParticipants, price, imageUrl, or allergenes"
+          );
 
-//         done();
-//       });
-//   });
+        done();
+      });
+  });
 
-//   it("Delete test user after the tests", (done) => {
-//     chai
-//       .request(server)
-//       .delete(`/api/user/${testMealId}`)
-//       .set("Authorization", `Bearer ${testMealToken}`)
-//       .end((err, res) => {
-//         assert.ifError(err);
-//         res.should.have.status(200);
-//         done();
-//       });
-//   });
+  it("TC-301-2 Create meal without logging in, a valid error should be returned", (done) => {
+    chai
+      .request(server)
+      .post("/api/meal")
+      .send({
+        name: "TestMeal",
+        description: "A description",
+        price: 10.0,
+        category: "Lunch",
+        isActive: 1,
+        isVega: 0,
+        isVegan: 0,
+        isToTakeHome: 0,
+        dateTime: "2021-06-01T12:00:00",
+        maxAmountOfParticipants: 10,
+        imageUrl: "https://www.google.com",
+        allergenes: "Gluten",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
 
-// it("TC-301-2 Create meal without logging in, a valid error should be returned", (done) => {
-//   chai
-//     .request(server)
-//     .post("/api/meal")
-//     .send({
-//       name: "TestMeal",
-//       description: "A description",
-//       price: 10.0,
-//       category: "Lunch",
-//       isActive: 1,
-//       isVega: 0,
-//       isVegan: 0,
-//       isToTakeHome: 0,
-//       dateTime: "2021-06-01T12:00:00",
-//       maxAmountOfParticipants: 10,
-//       imageUrl: "https://www.google.com",
-//       allergenes: "Gluten",
-//     })
-//     .end((err, res) => {
-//       assert.ifError(err);
+        res.should.have.status(401);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
 
-//       res.should.have.status(401);
-//       res.should.be.an("object");
-//       res.body.should.be
-//         .an("object")
-//         .that.has.all.keys("status", "message", "data");
+        let { status, message } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals("No token provided!");
 
-//       let { status, message } = res.body;
-//       status.should.be.a("number");
-//       message.should.be.a("string").that.equals("No token provided!");
+        done();
+      });
+  });
 
-//       done();
-//     });
-// });
+  it("TC-301-3 Create meal succesfully", (done) => {
+    chai
+      .request(server)
+      .post("/api/meal")
+      .set("Authorization", `Bearer ${testMealToken}`)
+      .send({
+        name: "TestMeal",
+        description: "A description",
+        price: 10.0,
+        category: "Lunch",
+        isActive: true,
+        isVega: false,
+        isVegan: true,
+        isToTakeHome: false,
+        dateTime: "2021-06-01T12:00:00",
+        maxAmountOfParticipants: 10,
+        imageUrl: "https://www.google.com",
+        allergenes: "Gluten",
+      })
+      .end((err, res) => {
+        assert.ifError(err);
 
-// it("TC-301-3 Create meal succesfully", (done) => {
-//   chai
-//     .request(server)
-//     .post("/api/meal")
-//     .set("Authorization", `Bearer ${testMealToken}`)
-//     .send({
-//       name: "TestMeal",
-//       description: "A description",
-//       price: 10.0,
-//       category: "Lunch",
-//       isActive: 1,
-//       isVega: 0,
-//       isVegan: 0,
-//       isToTakeHome: 0,
-//       dateTime: "2021-06-01T12:00:00",
-//       maxAmountOfParticipants: 10,
-//       imageUrl: "https://www.google.com",
-//       allergenes: "Gluten",
-//     })
-//     .end((err, res) => {
-//       assert.ifError(err);
+        res.should.have.status(201);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
 
-//       res.should.have.status(201);
-//       res.should.be.an("object");
-//       res.body.should.be
-//         .an("object")
-//         .that.has.all.keys("status", "message", "data");
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be.a("string").that.equals(`Meal created successfully`);
 
-//       let { status, message, data } = res.body;
-//       status.should.be.a("number");
-//       message.should.be
-//         .a("string")
-//         .that.equals(`Meal created with id ${data.id}.`);
+        done();
+      });
+  });
 
-//       done();
-//     });
-// });
-// });
+  it("Delete test user after the tests", (done) => {
+    chai
+      .request(server)
+      .delete(`/api/user/${testMealId}`)
+      .set("Authorization", `Bearer ${testMealToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+        res.should.have.status(200);
+        done();
+      });
+  });
+});
+
+describe("UC-303 Get all meals", () => {
+  let testMealToken;
+
+  it("Login with test user to get valid token ", (done) => {
+    chai
+      .request(server)
+      .post("/api/user")
+      .send({
+        emailAdress: "TEST1@avans.nl",
+        password: "secret",
+      })
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        } else {
+          assert.ifError(err);
+          testMealToken = res.body.data.token;
+          done();
+        }
+      });
+  });
+
+  it("TC-303-1 Get list of all meals", (done) => {
+    chai
+      .request(server)
+      .get("/api/meal")
+      .set("Authorization", `Bearer ${testMealToken}`)
+      .end((err, res) => {
+        assert.ifError(err);
+
+        res.should.have.status(200);
+        res.should.be.an("object");
+        res.body.should.be
+          .an("object")
+          .that.has.all.keys("status", "message", "data");
+
+        let { status, message, data } = res.body;
+        status.should.be.a("number");
+        message.should.be
+          .a("string")
+          .that.equals(`All meals retrieved successfully`);
+
+        data.should.be.an("array");
+        data.forEach((meal) => {
+          meal.should.be
+            .an("object")
+            .that.includes.keys(
+              "id",
+              "name",
+              "cookId",
+              "description",
+              "price",
+              "isActive",
+              "isVega",
+              "isVegan",
+              "isToTakeHome",
+              "dateTime",
+              "maxAmountOfParticipants",
+              "imageUrl",
+              "allergenes",
+              "createDate",
+              "updateDate"
+            );
+        });
+
+        done();
+      });
+  });
+});
+
+describe("UC-304 Get meal by id", () => {
+  let testMealToken;
+  it("Login to get valid token", (done) => {
+    chai
+      .request(server)
+      .post("/api/login")
+      .send({
+        emailAdress: "TEST1@avans.nl",
+        password: "secret",
+      })
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        } else {
+          assert.ifError(err);
+          testMealToken = res.body.data.token;
+          done();
+        }
+      });
+  });
+
+  // it("UC-304-1 Get meal by id without logging in", (done) => {});
+  // it("UC-304-2 Get meal by id with valid token", (done) => {});
+});

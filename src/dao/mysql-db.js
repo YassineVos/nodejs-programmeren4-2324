@@ -14,7 +14,10 @@ const mysqlDb = {
     }
     const sql = `
         INSERT INTO user 
+
         (firstName, lastName, emailAdress, password, phoneNumber, street, city, roles) 
+
+
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const values = [
@@ -25,7 +28,9 @@ const mysqlDb = {
       user.phoneNumber,
       user.street,
       user.city,
+
       user.roles,
+
     ];
     pool.query(sql, values, (err, result) => {
       if (err) {

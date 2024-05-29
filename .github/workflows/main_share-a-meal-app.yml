@@ -49,8 +49,17 @@ jobs:
           name: node-app
           path: release.zip
 
+      - name: Print current directory
+        run: pwd
+
+      - name: List directory contents
+        run: ls -al
+
       - name: Unzip artifact for deployment
         run: unzip -o release.zip -d extracted
+
+      - name: List extracted directory contents
+        run: ls -al extracted
 
       - name: Login to Azure
         uses: azure/login@v1

@@ -11,7 +11,7 @@ tracer.setLevel(process.env.LOG_LEVEL);
 const dbConfig = {
   connectionLimit: 10,
   host: process.env.DB_HOST || "localhost",
-  port: process.env.DB_PORT || 3306,
+  port: process.env.DB_PORT || 3000,
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_DATABASE || "share-a-meal-testdb",

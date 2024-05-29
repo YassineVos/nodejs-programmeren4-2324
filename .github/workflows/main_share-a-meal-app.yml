@@ -47,10 +47,10 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: node-app
-          path: .
+          path: release.zip
 
       - name: Unzip artifact for deployment
-        run: unzip -o release.zip
+        run: unzip -o release.zip -d extracted
 
       - name: Login to Azure
         uses: azure/login@v1
@@ -64,4 +64,4 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: "share-a-meal-app"
-          package: "."
+          package: "extracted"

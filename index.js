@@ -20,8 +20,6 @@ app.use("/api", userRoutes);
 
 app.use(validateToken);
 
-const port = process.env.PORT || 3000;
-
 app.get("/", function (req, res) {
   res.json({ message: "Hello World" });
 });
@@ -58,6 +56,8 @@ app.use((error, req, res, next) => {
     data: {},
   });
 });
+
+const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

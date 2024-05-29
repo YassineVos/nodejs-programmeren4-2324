@@ -17,7 +17,7 @@ app.use(express.json());
 app.use("/api", authRoutes);
 app.use("/api", mealRoutes);
 app.use("/api", userRoutes);
-//
+
 
 app.use(validateToken);
 

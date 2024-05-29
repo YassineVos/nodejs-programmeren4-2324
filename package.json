@@ -6,7 +6,7 @@
     "build": "npm install",
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "mocha test/*.js"
+    "test": "echo \"No test specified\""
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

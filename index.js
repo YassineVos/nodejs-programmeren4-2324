@@ -1,56 +1,68 @@
-const express = require('express')
-const userRoutes = require('./src/routes/user.routes')
+require("dotenv").config();
+const logger = require("./src/util/logger");
 
-const app = express()
+const express = require("express");
+const userRoutes = require("./src/routes/user.routes");
+const {
+  routes: authRoutes,
+  validateToken,
+} = require("./src/routes/authentication.routes");
+const mealRoutes = require("./src/routes/meal.routes");
+const app = express();
 
 // express.json zorgt dat we de body van een request kunnen lezen
-app.use(express.json())
+app.use(express.json());
 
-const port = process.env.PORT || 3000
+// Add authentication routes before other protected routes
+app.use("/api", authRoutes);
+app.use("/api", mealRoutes);
+app.use("/api", userRoutes);
+//   
 
-app.all('*', (req, res, next) => {
-    console.log('Request:', req.method, req.url)
-    next()
-})
+app.use(validateToken);
 
-app.get('/', function (req, res) {
-    res.json({ message: 'Hello World' })
-})
+var port = process.env.PORT || 3000;
 
-app.get('/api/info', (req, res) => {
-    console.log('GET /api/info')
-    const info = {
-        name: 'My Nodejs Express server',
-        version: '0.0.1',
-        description: 'This is a simple Nodejs Express server'
-    }
-    res.json(info)
-})
+app.get("/", function (req, res) {
+  res.json({ message: "Hello World" });
+});
 
-// Hier komen alle routes
-app.use(userRoutes)
+app.all("*", (req, res, next) => {
+  console.log("Request:", req.method, req.url);
+  next();
+});
 
-// Hier komt de route error handler te staan!
+app.get("/api/info", (req, res) => {
+  console.log("GET /api/info");
+  const info = {
+    studentName: "Yessin Boukrach",
+    studentNumber: "2206857",
+    description: "This is the API for the Share a Meal app.",
+  };
+  res.json(info);
+});
+
+// Error handler for undefined routes
 app.use((req, res, next) => {
-    next({
-        status: 404,
-        message: 'Route not found',
-        data: {}
-    })
-})
+  next({
+    status: 404,
+    message: "Route not found",
+    data: {},
+  });
+});
 
-// Hier komt je Express error handler te staan!
+// General Express error handler
 app.use((error, req, res, next) => {
-    res.status(error.status || 500).json({
-        status: error.status || 500,
-        message: error.message || 'Internal Server Error',
-        data: {}
-    })
-})
+  res.status(error.status || 500).json({
+    status: error.status || 500,
+    message: error.message || "Internal Server Error",
+    data: {},
+  });
+});
 
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`)
-})
+  console.log(`Server is running on port ${port}`);
+});
 
-// Deze export is nodig zodat Chai de server kan opstarten
-module.exports = app
+// Export for Chai to start the server
+module.exports = app;

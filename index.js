@@ -18,7 +18,7 @@ app.use("/api", authRoutes);
 app.use("/api", mealRoutes);
 app.use("/api", userRoutes);
 //   
-
+// 
 app.use(validateToken);
 
 var port = process.env.PORT || 3000;

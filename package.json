@@ -5,8 +5,7 @@
   "scripts": {
     "build": "npm install",
     "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "echo \"no test specified\""
+    "dev": "nodemon index.js"
   },
   "dependencies": {
     "are-we-there-yet": "^4.0.2",

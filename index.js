@@ -19,6 +19,17 @@ app.use("/api", mealRoutes);
 app.use("/api", userRoutes);
 //
 //
+
+app.get("/api/info", (req, res) => {
+  console.log("GET /api/info");
+  const info = {
+    studentName: "Yessin Boukrach",
+    studentNumber: "2206857",
+    description: "This is the API for the Share a Meal app.",
+  };
+  res.json(info);
+});
+
 app.use(validateToken);
 
 var port = process.env.PORT || 3000;
@@ -30,16 +41,6 @@ app.get("/", function (req, res) {
 app.all("*", (req, res, next) => {
   console.log("Request:", req.method, req.url);
   next();
-});
-
-app.get("/api/info", (req, res) => {
-  console.log("GET /api/info");
-  const info = {
-    studentName: "Yessin Boukrach",
-    studentNumber: "2206857",
-    description: "This is the API for the Share a Meal app.",
-  };
-  res.json(info);
 });
 
 // Error handler for undefined routes

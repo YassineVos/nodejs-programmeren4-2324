@@ -107,7 +107,7 @@ describe("UC-101 Login", () => {
       .request(server)
       .post("/api/login")
       .send({
-        emailAdress: "TEST1@avans.nl",
+        emailAdress: "m.vandullemen@server.nl",
         password: "secret",
       })
       .end((err, res) => {
@@ -242,7 +242,7 @@ describe("UC-201 Register", () => {
       phoneNumber: "1234567890",
       street: "Mainstreet",
       city: "New York",
-      roles: "user",
+      roles: "",
     };
 
     // Create the user for the first time
@@ -316,7 +316,7 @@ describe("UC-201 Register", () => {
         phoneNumber: "1234567890",
         street: "Mainstreet",
         city: "New York",
-        roles: "user",
+        roles: "",
       })
       .end((err, res) => {
         assert.ifError(err);

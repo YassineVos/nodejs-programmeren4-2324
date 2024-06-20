@@ -42,7 +42,7 @@ const validateUserCreateAssert = (req, res, next) => {
 };
 
 // Define user routes
-router.get("/user/getAll", validateToken, userController.getAll);
+router.get("/user/getAll", userController.getAll);
 router.post("/user", validateUserCreateAssert, userController.add);
 router.get("/user/profile", validateToken, userController.getProfile);
 router.get("/user/:userId", validateToken, userController.getById);

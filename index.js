@@ -56,7 +56,7 @@ app.use((req, res, next) => {
 app.use((error, req, res, next) => {
   res.status(error.status || 500).json({
     status: error.status || 500,
-    message: error.message || "Internal Server Error, foofing",
+    message: error.message || "Internal Server Error, foofing " + error.message,
     data: {},
   });
 });

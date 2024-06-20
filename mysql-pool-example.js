@@ -10,11 +10,11 @@ tracer.setLevel(process.env.LOG_LEVEL);
 // Hier worden de db connection settings opgehaald uit de .env file
 const dbConfig = {
   connectionLimit: 10,
-  host: process.env.DB_HOST || "localhost",
-  port: process.env.DB_PORT || 25060,
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_DATABASE || "share-a-meal-testdb",
+  host: process.env.DB_HOST ,
+  port: process.env.DB_PORT ,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD ,
+  database: process.env.DB_DATABASE,
   multipleStatements: true,
 };
 

@@ -107,7 +107,7 @@ describe("UC-101 Login", () => {
       .request(server)
       .post("/api/login")
       .send({
-        emailAdress: "m.vandullemen@server.nl",
+        emailAdress: "TEST1@avans.nl",
         password: "secret",
       })
       .end((err, res) => {

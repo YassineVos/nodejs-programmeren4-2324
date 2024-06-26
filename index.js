@@ -32,7 +32,7 @@ app.get("/api/info", (req, res) => {
 
 app.use(validateToken);
 
-var port = process.env.PORT || 25060;
+var port = process.env.DB_PORT;
 
 app.get("/", function (req, res) {
   res.json({ message: "Hello World" });

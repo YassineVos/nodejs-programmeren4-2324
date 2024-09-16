@@ -607,9 +607,10 @@ describe("UC-203 Get user profile", () => {
       });
   });
   it("TC-203-2 Get user profile with valid token", (done) => {
+    console.log(testToken);
     chai
       .request(server)
-      .get("/api/user/41")
+      .get("/api/user/59")
       .set("Authorization", `Bearer ${testToken}`)
       .end((err, res) => {
         assert.ifError(err);
@@ -707,7 +708,7 @@ describe("UC-204 Get user by id", () => {
   it("TC-204-3 Get user with id that exists", (done) => {
     chai
       .request(server)
-      .get("/api/user/41")
+      .get("/api/user/59")
       .set("Authorization", `Bearer ${testToken}`)
       .end((err, res) => {
         assert.ifError(err);
@@ -717,7 +718,7 @@ describe("UC-204 Get user by id", () => {
         res.body.should.be.an("object").that.has.all.keys("message", "data");
 
         let { message, data } = res.body;
-        message.should.be.a("string").that.equals(`Found user with id 41.`);
+        message.should.be.a("string").that.equals(`Found user with id 59.`);
         data.should.be
           .an("object")
           .that.includes.keys(
@@ -748,10 +749,8 @@ describe("UC-205 Update user", () => {
         lastName: "Test",
         emailAdress: "updatetest@server.com",
         password: "secret",
-        phoneNumber: "1234567890",
         street: "Mainstreet",
         city: "New York",
-        roles: "user",
       })
       .end((err, res) => {
         assert.ifError(err);
@@ -1100,7 +1099,7 @@ describe("UC-206 Delete user", () => {
   it("TC-206-2 Delete user without logging verin", (done) => {
     chai
       .request(server)
-      .delete("/api/user/41")
+      .delete("/api/user/59")
       .end((err, res) => {
         assert.ifError(err);
 
